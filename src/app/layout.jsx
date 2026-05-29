@@ -1,12 +1,16 @@
 import './globals.css';
-import TopBar from '@/components/TopBar';
+import { ThemeProvider } from '@/lib/theme';
+import Header from '@/components/layout/Header';
 
 export const metadata = {
-  title: 'LevelShift — Process Demo',
-  description: 'AI-powered business process assessment demo',
+  title: 'LevelShift — Discovery Studio',
+  description: 'AI-powered business process intelligence & automation discovery',
 };
 
-const themeScript = `(function(){var t=localStorage.getItem('demo-theme')||'light';document.documentElement.setAttribute('data-theme',t);})()`;
+const themeScript = `(function(){
+  var t = localStorage.getItem('ls-theme') || localStorage.getItem('demo-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})()`;
 
 export default function RootLayout({ children }) {
   return (
@@ -15,16 +19,16 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
       <body suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <TopBar />
-        <main className="main-content">
-          {children}
-        </main>
+        <ThemeProvider>
+          <Header />
+          <main>{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

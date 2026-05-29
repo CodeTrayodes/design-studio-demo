@@ -1,8 +1,8 @@
-'use client';
+﻿'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { TECH_CATEGORIES } from '@/lib/processes';
-import { StepIndicator, StoryContext } from '../page';
+import { StepIndicator, StoryContext } from '@/components/legacy/StepContext';
 
 function buildAiSelections(inferredTechStack) {
   const result = {};
@@ -75,7 +75,7 @@ export default function SetupPage() {
   if (!process) return null;
 
   const storyItems = [{ icon: process.emoji, label: process.name }];
-  if (company?.name) storyItems.push({ icon: '🏢', label: company.name });
+  if (company?.name) storyItems.push({ icon: 'ðŸ¢', label: company.name });
 
   return (
     <div style={{ maxWidth: 680, margin: '0 auto' }} className="animate-fade-in-up">
@@ -85,11 +85,11 @@ export default function SetupPage() {
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button className="btn-back" onClick={() => router.push('/')}>←</button>
+          <button className="btn-back" onClick={() => router.push('/')}>â†</button>
           <div>
             <p className="section-tag" style={{ marginBottom: 2 }}>Technology Stack</p>
             <h1 style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-tx)', letterSpacing: '-0.01em' }}>
-              {company?.name ? `${company.name} — ` : ''}Technology profile
+              {company?.name ? `${company.name} â€” ` : ''}Technology profile
             </h1>
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function SetupPage() {
       {/* Pre-filled notice */}
       {hasAiRec && (
         <div className="banner-info animate-slide-down" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 16 }}>
-          <span style={{ flexShrink: 0, fontSize: 12, marginTop: 1 }}>ⓘ</span>
+          <span style={{ flexShrink: 0, fontSize: 12, marginTop: 1 }}>â“˜</span>
           <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-ac)', lineHeight: 1.6 }}>
             Pre-filled based on the {company?.name} profile. Review and adjust to match your actual environment.
           </p>
@@ -169,7 +169,7 @@ export default function SetupPage() {
       {totalSelected > 0 && (
         <div className="panel animate-slide-down" style={{ padding: 16, marginBottom: 16 }}>
           <p className="section-tag" style={{ marginBottom: 10 }}>
-            Your technology toolkit · {totalSelected} tools
+            Your technology toolkit Â· {totalSelected} tools
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {TECH_CATEGORIES.map(cat =>
@@ -195,7 +195,7 @@ export default function SetupPage() {
       )}
 
       <button className="btn-primary" onClick={proceed} disabled={!canProceed}>
-        {canProceed ? 'Continue to Context →' : 'Select at least one tool to continue'}
+        {canProceed ? 'Continue to Context â†’' : 'Select at least one tool to continue'}
       </button>
 
     </div>

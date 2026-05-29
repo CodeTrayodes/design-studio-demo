@@ -1,447 +1,285 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { PROCESSES } from '@/lib/processes';
 
-/* Spinner rendered as a CSS-class element so @keyframes spin is guaranteed to apply */
-function Spinner({ size = 22, thickness = 2.5 }) {
-  return (
-    <div
-      className="animate-spin"
-      style={{
-        width: size, height: size,
-        border: `${thickness}px solid var(--c-ac)`,
-        borderTopColor: 'transparent',
-        borderRadius: '50%',
-        flexShrink: 0,
-      }}
-    />
-  );
-}
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '@/lib/theme';
+import { useConversation } from '@/hooks/useConversation';
+import { PROCESS_TEMPLATES } from '@/lib/processTemplates';
+import { fadeUp, staggerContainer } from '@/lib/animations';
+import ChatThread from '@/components/discovery/ChatThread';
 
-/* ─── Shared: Step indicator ─────────────────────────────────────────────── */
-const STEPS = [
-  { num: 1, label: 'Scope',    path: '/'         },
-  { num: 2, label: 'Stack',    path: '/setup'    },
-  { num: 3, label: 'Context',  path: '/input'    },
-  { num: 4, label: 'Analysis', path: '/discover' },
-  { num: 5, label: 'Report',   path: '/plan'     },
-];
+/* ── Empty-state hero ────────────────────────────────────────────────────── */
 
-export function StepIndicator({ current }) {
-  const router = useRouter();
-  return (
-    <div className="step-row no-print">
-      {STEPS.map((step, i) => {
-        const done   = step.num < current;
-        const active = step.num === current;
-        return (
-          <div key={step.num} style={{ display: 'flex', alignItems: 'center' }}>
-            <button
-              onClick={() => done && router.push(step.path)}
-              className={`step-pill ${active ? 'step-pill-active' : done ? 'step-pill-done' : 'step-pill-future'}`}
-            >
-              <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 700 }}>
-                {done ? '✓' : step.num}
-              </span>
-              <span className="hidden sm:inline">{step.label}</span>
-            </button>
-            {i < STEPS.length - 1 && (
-              <div className={`step-line ${done ? 'step-line-done' : ''}`} />
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) {
+  const [input, setInput] = useState('');
+  const inputRef          = useRef(null);
 
-/* ─── Shared: Assessment context breadcrumb ──────────────────────────────── */
-export function StoryContext({ items }) {
-  if (!items || items.length === 0) return null;
-  return (
-    <div className="story-row animate-slide-down">
-      <span className="story-label">Assessment</span>
-      <span style={{ color: 'var(--c-dm)', fontSize: 11 }}>·</span>
-      {items.map((item, i) => (
-        <span key={i} className="story-chip">
-          {item.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-/* ─── Home Page ─────────────────────────────────────────────────────────── */
-export default function Home() {
-  const router  = useRouter();
-  const ran     = useRef(false);
-
-  const [processId, setProcessId]                   = useState('');
-  const [customProcessName, setCustomProcessName]   = useState('');
-  const [companyName, setCompanyName]               = useState('');
-  const [companyDescription, setCompanyDescription] = useState('');
-  const [phase, setPhase]                           = useState('form');
-  const [researchProgress, setResearchProgress]     = useState(0);
-  const [isLongRunning, setIsLongRunning]           = useState(false);
-  const [error, setError]                           = useState('');
-  const [activeSession, setActiveSession]           = useState(null);
-  const abortRef = useRef(null);
+  useEffect(() => { inputRef.current?.focus(); }, []);
 
   useEffect(() => {
-    if (ran.current) return;
-    ran.current = true;
-    const p    = JSON.parse(sessionStorage.getItem('demo_process')   || 'null');
-    const co   = JSON.parse(sessionStorage.getItem('demo_company')   || 'null');
-    const tech = JSON.parse(sessionStorage.getItem('demo_tech')      || 'null');
-    const disc = JSON.parse(sessionStorage.getItem('demo_discovery') || 'null');
-    const plan = JSON.parse(sessionStorage.getItem('demo_plan')      || 'null');
-    if (p) {
-      let step = 1; let resumePath = '/setup';
-      if (plan)      { step = 5; resumePath = '/plan';     }
-      else if (disc) { step = 4; resumePath = '/discover'; }
-      else if (tech) { step = 3; resumePath = '/input';    }
-      setActiveSession({ process: p, company: co, step, resumePath });
-      setProcessId(p.id || 'custom');
-      if (p.id === 'custom') setCustomProcessName(p.name || '');
-      if (co?.name)        setCompanyName(co.name);
-      if (co?.description) setCompanyDescription(co.description);
+    if (selectedProcess && selectedProcess.id !== 'custom') {
+      setInput(`Audit our ${selectedProcess.name.toLowerCase()} process.`);
+      inputRef.current?.focus();
     }
-  }, []);
+  }, [selectedProcess]);
 
-  function getProcess() {
-    if (!processId) return null;
-    if (processId === 'custom') {
-      if (!customProcessName.trim()) return null;
-      return {
-        id: 'custom', name: customProcessName.trim(), emoji: '✏️',
-        tagline: 'Custom business process', timeEstimate: '10 minutes',
-        exampleFinding: '', whatYouDiscover: [], stages: [],
-      };
-    }
-    return PROCESSES[processId] || null;
+  function handleSubmit(e) {
+    e?.preventDefault();
+    if (!input.trim()) return;
+    onSubmit(input.trim());
   }
 
-  const process    = getProcess();
-  const canResearch = !!process && companyName.trim().length >= 2;
+  return (
+    <motion.div
+      key="hero"
+      initial="hidden"
+      animate="visible"
+      exit={{ opacity: 0, y: -8, transition: { duration: 0.25 } }}
+      variants={staggerContainer(0.1)}
+      className="flex flex-col items-center justify-center text-center px-4 flex-1"
+      style={{ minHeight: 'calc(100vh - 48px)' }}
+    >
+      <motion.p
+        variants={fadeUp}
+        className={`font-serif text-lg md:text-[22px] font-normal italic opacity-70 mb-5 select-none ${
+          isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'
+        }`}
+      >
+        "Describe a process, connect a tool, or upload a file."
+      </motion.p>
 
-  async function runResearch() {
-    if (!canResearch) return;
-    setPhase('researching');
-    setError('');
-    setResearchProgress(0);
-    setIsLongRunning(false);
-    ['demo_company','demo_research','demo_process_context','demo_discovery','demo_plan','demo_tech']
-      .forEach(k => sessionStorage.removeItem(k));
-    sessionStorage.setItem('demo_process', JSON.stringify(process));
+      <motion.h1
+        variants={fadeUp}
+        className={`font-serif text-[28px] md:text-[42px] font-normal leading-tight tracking-tight mb-3 max-w-2xl ${
+          isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'
+        }`}
+      >
+        Uncover operational debt.
+        <br />
+        <span className="text-[#F5A623]">Name the pain.</span> Deploy the fix.
+      </motion.h1>
 
-    const controller = new AbortController();
-    abortRef.current = controller;
+      <motion.p
+        variants={fadeUp}
+        className={`text-sm max-w-sm mb-10 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}
+      >
+        Discovery Studio maps your workflows, quantifies financial waste, and hands
+        back configured AI agents in under three minutes.
+      </motion.p>
 
-    const timer = setInterval(() => {
-      setResearchProgress(p => { if (p >= 90) { clearInterval(timer); return 90; } return p + Math.random() * 14; });
-    }, 600);
-
-    /* Show "still working" hint after 20 s */
-    const longRunTimer = setTimeout(() => setIsLongRunning(true), 20000);
-    /* Hard abort after 120 s */
-    const abortTimer   = setTimeout(() => controller.abort(), 120000);
-
-    try {
-      const res = await fetch('/api/demo/research', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          companyName:        companyName.trim(),
-          companyDescription: companyDescription.trim(),
-          processId:          process.id,
-          processName:        process.name,
-        }),
-        signal: controller.signal,
-      });
-      clearInterval(timer);
-      clearTimeout(longRunTimer);
-      clearTimeout(abortTimer);
-      const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || `Server error ${res.status}`);
-      const company = { name: companyName.trim(), description: companyDescription.trim() };
-      sessionStorage.setItem('demo_company',  JSON.stringify(company));
-      sessionStorage.setItem('demo_research', JSON.stringify(data));
-      sessionStorage.setItem('demo_process_context', JSON.stringify({
-        method: 'research', methodLabel: 'AI Company Research',
-        description: data.processDescription,
-      }));
-      if (process.id === 'custom' && data.stages?.length) {
-        sessionStorage.setItem('demo_process', JSON.stringify({ ...process, stages: data.stages }));
-      }
-      sessionStorage.removeItem('demo_discovery');
-      sessionStorage.removeItem('demo_plan');
-      router.push('/setup');
-    } catch (e) {
-      clearInterval(timer);
-      clearTimeout(longRunTimer);
-      clearTimeout(abortTimer);
-      if (e.name === 'AbortError') {
-        setError('The request timed out. The AI service may be busy — please try again.');
-      } else {
-        setError(e.message || 'Research failed. Please try again.');
-      }
-      setPhase('form');
-    }
-  }
-
-  function cancelResearch() {
-    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
-    setPhase('form');
-    setIsLongRunning(false);
-  }
-
-  function clearSession() {
-    ['demo_company','demo_research','demo_process_context','demo_discovery','demo_plan','demo_tech','demo_process']
-      .forEach(k => sessionStorage.removeItem(k));
-    setActiveSession(null);
-    setPhase('form');
-    setProcessId('');
-    setCustomProcessName('');
-    setCompanyName('');
-    setCompanyDescription('');
-    setError('');
-  }
-
-  const STEP_LABELS = ['', 'Scope', 'Stack', 'Context', 'Analysis', 'Report'];
-
-  /* ── Profiling state ───────────────────────────────────────────────────── */
-  if (phase === 'researching') {
-    const steps = [
-      { label: 'Company profile — industry, scale, market position', done: researchProgress > 20 },
-      { label: 'Technology landscape and platform usage',            done: researchProgress > 40 },
-      { label: `Process mapping for ${process?.name}`,              done: researchProgress > 60 },
-      { label: 'Automation opportunity identification',              done: researchProgress > 80 },
-    ];
-    return (
-      <div style={{ maxWidth: 480, margin: '0 auto' }} className="animate-fade-in-up">
-        <StepIndicator current={1} />
-
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 12,
-            background: 'var(--c-acBg)', border: '1px solid var(--c-acBd)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px',
-          }}>
-            <Spinner size={22} thickness={2.5} />
+      <motion.form
+        variants={fadeUp}
+        onSubmit={handleSubmit}
+        className="w-full max-w-2xl mb-10"
+      >
+        <div className={`relative border-b pb-3 px-1 flex items-center text-xl md:text-2xl font-serif transition-all duration-300 focus-within:border-[#F5A623] ${
+          isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'
+        }`}>
+          <div className="relative flex-1 flex items-center">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="I want to audit our lead-to-cash process."
+              className={`w-full bg-transparent border-none focus:outline-none pr-3 leading-snug ${
+                isDark ? 'text-white placeholder-[#8E8E93]/40' : 'text-[#18181A] placeholder-[#3D3D44]/40'
+              }`}
+            />
+            <span className="w-[2px] h-7 bg-[#F5A623] inline-block shadow-[0_0_10px_rgba(245,166,35,0.4)] animate-cursor-blink shrink-0 ml-1" />
           </div>
-          <h2 style={{ fontSize: 17, fontWeight: 600, color: 'var(--c-tx)', marginBottom: 6 }}>
-            Profiling {companyName}
-          </h2>
-          <p style={{ fontSize: 12, color: 'var(--c-mu)', lineHeight: 1.6 }}>
-            Generating a readiness profile for{' '}
-            <strong style={{ color: 'var(--c-tx)' }}>{process?.name}</strong>
-          </p>
+          <button
+            type="submit"
+            disabled={!input.trim()}
+            className={`p-2.5 rounded-xl transition-all duration-300 ml-3 ${
+              input.trim()
+                ? 'bg-[#F5A623] text-black hover:scale-105 cursor-pointer shadow-md shadow-[#F5A623]/25'
+                : `cursor-not-allowed border ${isDark ? 'text-[#8E8E93]/50 bg-[#1C1C1E] border-[#3A3A3C]' : 'text-[#3D3D44]/50 bg-white border-[#D5D0C8]'}`
+            }`}
+          >
+            <ArrowRight size={18} />
+          </button>
         </div>
 
-        <div className="card" style={{ padding: 20, marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <span className="section-tag">Progress</span>
-            <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, fontWeight: 700, color: 'var(--c-ac)' }}>
-              {Math.round(researchProgress)}%
-            </span>
-          </div>
-          <div className="progress-track" style={{ marginBottom: 20 }}>
-            <div className="progress-fill" style={{ width: `${researchProgress}%` }} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {steps.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                {s.done
-                  ? <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--c-grBg)', color: 'var(--c-gr)', border: '1px solid var(--c-grBd)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, flexShrink: 0 }}>✓</span>
-                  : <Spinner size={18} thickness={2} />
-                }
-                <span style={{ fontSize: 11, color: s.done ? 'var(--c-mu)' : 'var(--c-dm)' }}>{s.label}</span>
-              </div>
+        <div className={`mt-3 flex items-center space-x-2 text-[10px] font-mono opacity-50 select-none ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+          <span className="uppercase tracking-widest font-semibold text-[9px]">STATUS</span>
+          <div className="flex space-x-1">
+            {[60, 30, 10].map(op => (
+              <span key={op} className="w-1 h-1 rounded-full bg-[#F5A623]" style={{ opacity: op / 100 }} />
             ))}
           </div>
+          <span className="uppercase tracking-widest">Awaiting operational signals...</span>
         </div>
+      </motion.form>
 
-        {isLongRunning && (
-          <div className="banner-info animate-slide-down" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <span style={{ flexShrink: 0 }}>ⓘ</span>
-            <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-ac)', lineHeight: 1.6, flex: 1 }}>
-              Still working — the AI service is taking longer than usual. This can take up to 2 minutes.
-            </p>
-          </div>
-        )}
+      <motion.div variants={fadeUp} className="w-full max-w-2xl">
+        <div className="flex items-center space-x-1.5 mb-3 justify-center">
+          <Sparkles size={11} className="text-[#F5A623]" />
+          <span className={`text-[11px] font-mono uppercase tracking-wider ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+            Common process audits
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
+          {PROCESS_TEMPLATES.filter(p => p.id !== 'custom').slice(0, 6).map(p => (
+            <motion.button
+              key={p.id}
+              whileHover={{ y: -2 }}
+              onClick={() => setSelectedProcess(p)}
+              className={`text-xs px-3.5 py-1.5 rounded-full border transition-all cursor-pointer ${
+                selectedProcess?.id === p.id
+                  ? 'border-[#F5A623] text-[#F5A623] bg-[#F5A623]/10'
+                  : isDark
+                  ? 'border-[#3A3A3C] text-[#8E8E93] hover:border-[#8E8E93] hover:text-[#F1F1F3]'
+                  : 'border-[#D5D0C8] text-[#3D3D44] hover:border-[#3D3D44] hover:text-[#18181A]'
+              }`}
+            >
+              {p.name}
+            </motion.button>
+          ))}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
-        <button
-          className="btn-ghost"
-          onClick={cancelResearch}
-          style={{ width: '100%', fontSize: 11, color: 'var(--c-mu)' }}
-        >
-          Cancel
-        </button>
-      </div>
-    );
+/* ── Main page ───────────────────────────────────────────────────────────── */
+
+export default function DiscoveryPage() {
+  const { isDark }     = useTheme();
+  const conv           = useConversation();
+  const [input, setInput]                           = useState('');
+  const [selectedProcess, setSelectedProcess]       = useState(null);
+  const inputRef       = useRef(null);
+
+  const isEmpty = conv.messages.length === 0;
+
+  useEffect(() => {
+    if (!isEmpty && selectedProcess && selectedProcess.id !== 'custom') {
+      setInput(`Audit our ${selectedProcess.name.toLowerCase()} process.`);
+    }
+  }, [selectedProcess, isEmpty]);
+
+  const handleHeroSubmit = useCallback((text) => {
+    conv.sendMessage(text, { processId: selectedProcess?.id ?? null });
+  }, [conv, selectedProcess]);
+
+  function handleChatSubmit(e) {
+    e?.preventDefault();
+    if (!input.trim() || conv.streaming) return;
+    const text = input.trim();
+    setInput('');
+    conv.sendMessage(text, { processId: selectedProcess?.id ?? null });
   }
 
-  /* ── Form ──────────────────────────────────────────────────────────────── */
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto' }} className="animate-fade-in-up">
+    <div
+      className={`flex flex-col font-sans antialiased transition-colors duration-300 ${
+        isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'
+      }`}
+      style={{ minHeight: 'calc(100vh - 48px)' }}
+    >
+      {/* ── Empty: hero centred ── */}
+      <AnimatePresence>
+        {isEmpty && (
+          <HeroSection
+            isDark={isDark}
+            onSubmit={handleHeroSubmit}
+            selectedProcess={selectedProcess}
+            setSelectedProcess={setSelectedProcess}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <p className="section-tag" style={{ marginBottom: 10 }}>Automation Readiness Assessment</p>
-        <h1 style={{ fontSize: 24, fontWeight: 300, color: 'var(--c-tx)', letterSpacing: '-0.02em', lineHeight: 1.25, marginBottom: 8 }}>
-          From process to roadmap<br />in minutes
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--c-mu)', lineHeight: 1.6, maxWidth: 420 }}>
-          Select a business process and organisation, and receive a structured
-          automation maturity report with a phased implementation roadmap.
-        </p>
-      </div>
-
-      <StepIndicator current={1} />
-
-      {/* Resume session */}
-      {activeSession && phase === 'form' && (
-        <div className="banner-green animate-slide-down" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--c-tx)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {activeSession.process.name}{activeSession.company?.name ? ` — ${activeSession.company.name}` : ''}
-            </p>
-            <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-gr)' }}>
-              In progress · {STEP_LABELS[activeSession.step]} complete
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-            <button className="btn-ghost" style={{ fontSize: 10, padding: '4px 10px' }} onClick={clearSession}>
-              Discard
-            </button>
-            <button
-              onClick={() => router.push(activeSession.resumePath)}
-              style={{ padding: '4px 12px', background: 'var(--c-gr)', color: '#fff', border: 'none', borderRadius: 4, fontSize: 10, fontWeight: 700, fontFamily: 'IBM Plex Mono', cursor: 'pointer' }}
-            >
-              Continue →
-            </button>
+      {/* ── Chat thread ── */}
+      {!isEmpty && (
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-3xl mx-auto px-4 pt-8 pb-44 md:px-6">
+            <ChatThread
+              messages={conv.messages}
+              streaming={conv.streaming}
+              isDark={isDark}
+              onToolsConfirm={conv.confirmTools}
+              onContextConfirm={conv.confirmContext}
+              onAnalysisDone={conv.runAnalysis}
+              analysisResult={conv.analysisResult}
+              analysisApiReady={conv.analysisApiReady}
+            />
           </div>
         </div>
       )}
 
-      {/* Form card */}
-      <div className="card" style={{ padding: 24, marginBottom: 16 }}>
+      {/* ── Bottom command bar (chat mode only) ── */}
+      <AnimatePresence>
+        {!isEmpty && (
+          <motion.div
+            key="cmdbar"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.3 }}
+            className={`fixed bottom-0 left-0 right-0 z-40 border-t backdrop-blur-md ${
+              isDark ? 'bg-[#0B0B0E]/95 border-[#1C1C1E]' : 'bg-[#F3F1EC]/98 border-[#E6E2DB]'
+            }`}
+          >
+            <div className="max-w-3xl mx-auto px-4 md:px-6 py-3">
+              <div className="flex items-center justify-between mb-2">
+                <button
+                  onClick={conv.reset}
+                  className={`flex items-center space-x-1.5 text-[10px] font-mono uppercase tracking-wider cursor-pointer transition-colors ${
+                    isDark ? 'text-[#8E8E93] hover:text-[#F5A623]' : 'text-[#3D3D44] hover:text-[#F5A623]'
+                  }`}
+                >
+                  <RefreshCw size={9} /><span>New audit</span>
+                </button>
+              </div>
 
-        {/* Process */}
-        <div style={{ marginBottom: 18 }}>
-          <label className="form-label">
-            Process <span style={{ color: 'var(--c-rd)' }}>*</span>
-          </label>
-          <div className="form-select-wrap">
-            <select
-              value={processId}
-              onChange={e => { setProcessId(e.target.value); setCustomProcessName(''); setError(''); }}
-              className="form-select"
-            >
-              <option value="">Select a process…</option>
-              {Object.values(PROCESSES).map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-              <option value="custom">Other — specify below</option>
-            </select>
-            <svg className="form-select-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          {processId && processId !== 'custom' && PROCESSES[processId] && (
-            <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-dm)', marginTop: 5 }}>
-              {PROCESSES[processId].tagline}
-            </p>
-          )}
-        </div>
-
-        {/* Custom process name */}
-        {processId === 'custom' && (
-          <div style={{ marginBottom: 18 }} className="animate-fade-in-up">
-            <label className="form-label">
-              Process Name <span style={{ color: 'var(--c-rd)' }}>*</span>
-            </label>
-            <input
-              type="text"
-              value={customProcessName}
-              onChange={e => setCustomProcessName(e.target.value)}
-              placeholder="e.g. Procure to Pay, Record to Report, Issue to Resolution"
-              className="form-input"
-              maxLength={100}
-              autoFocus
-            />
-          </div>
+              <form
+                onSubmit={handleChatSubmit}
+                className={`border-b transition-all duration-300 pb-2 px-1 flex items-center focus-within:border-[#F5A623] ${
+                  isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'
+                }`}
+              >
+                <div className="flex-1 flex items-center">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="Continue the conversation..."
+                    disabled={conv.streaming}
+                    className={`w-full bg-transparent border-none focus:outline-none leading-snug text-base font-serif ${
+                      isDark ? 'text-white placeholder-[#8E8E93]/50' : 'text-[#18181A] placeholder-[#3D3D44]/50'
+                    }`}
+                  />
+                  {conv.streaming && (
+                    <div className="flex space-x-1 ml-2 shrink-0">
+                      {[0, 0.2, 0.4].map(d => (
+                        <span
+                          key={d}
+                          className="w-1.5 h-1.5 rounded-full bg-[#F5A623] animate-heartbeat-glow"
+                          style={{ animationDelay: `${d}s` }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={!input.trim() || conv.streaming}
+                  className={`p-2 rounded-xl transition-all duration-300 ml-2 ${
+                    input.trim() && !conv.streaming
+                      ? 'bg-[#F5A623] text-black hover:scale-105 cursor-pointer shadow-md shadow-[#F5A623]/20'
+                      : `cursor-not-allowed border ${isDark ? 'text-[#8E8E93]/50 bg-[#1C1C1E] border-[#3A3A3C]' : 'text-[#3D3D44]/50 bg-white border-[#D5D0C8]'}`
+                  }`}
+                >
+                  <ArrowRight size={15} />
+                </button>
+              </form>
+            </div>
+          </motion.div>
         )}
-
-        {/* Divider */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-          <div style={{ flex: 1, height: 1, background: 'var(--c-b)' }} />
-          <span className="section-tag">Organisation</span>
-          <div style={{ flex: 1, height: 1, background: 'var(--c-b)' }} />
-        </div>
-
-        {/* Company name */}
-        <div style={{ marginBottom: 14 }}>
-          <label className="form-label">
-            Name <span style={{ color: 'var(--c-rd)' }}>*</span>
-          </label>
-          <input
-            type="text"
-            value={companyName}
-            onChange={e => { setCompanyName(e.target.value); setError(''); }}
-            placeholder="e.g. Allianz, Walmart, JPMorgan Chase"
-            className="form-input"
-            maxLength={200}
-            onKeyDown={e => e.key === 'Enter' && canResearch && runResearch()}
-          />
-        </div>
-
-        {/* Company description */}
-        <div style={{ marginBottom: 20 }}>
-          <label className="form-label">
-            Additional Context{' '}
-            <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'var(--c-dm)' }}>
-              optional
-            </span>
-          </label>
-          <textarea
-            value={companyDescription}
-            onChange={e => setCompanyDescription(e.target.value)}
-            placeholder="Industry, headcount, current systems, known pain points…"
-            rows={3}
-            className="form-input"
-            maxLength={2000}
-          />
-        </div>
-
-        {error && (
-          <div className="banner-error animate-slide-down" style={{ marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-            <span style={{ flexShrink: 0 }}>⚠</span>
-            <span>{error}</span>
-          </div>
-        )}
-
-        <button className="btn-primary" onClick={runResearch} disabled={!canResearch}>
-          Begin Assessment →
-        </button>
-      </div>
-
-      {/* What the assessment covers */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        {[
-          { label: 'Company profile',     desc: 'Industry, scale, market position' },
-          { label: 'Technology landscape', desc: 'Current platforms and tooling'   },
-          { label: 'Process mapping',      desc: 'Current-state process analysis'  },
-          { label: 'Gap identification',   desc: 'Automation opportunity scoring'  },
-        ].map(item => (
-          <div key={item.label} className="card" style={{ padding: '12px 14px' }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--c-tx)', marginBottom: 2 }}>{item.label}</p>
-            <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, color: 'var(--c-dm)' }}>{item.desc}</p>
-          </div>
-        ))}
-      </div>
+      </AnimatePresence>
     </div>
   );
 }

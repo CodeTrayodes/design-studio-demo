@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { StepIndicator, StoryContext } from '../page';
+import { StepIndicator, StoryContext } from '@/components/legacy/StepContext';
 
 function scoreColor(score) {
   if (score >= 70) return { text: 'text-emerald-600', bg: 'bg-emerald-500', card: 'bg-emerald-50 border-emerald-200', badge: 'bg-emerald-100 text-emerald-700' };
@@ -118,14 +118,14 @@ export default function DiscoverPage() {
 
   // Build story context
   const storyItems = [];
-  if (process) storyItems.push({ icon: process.emoji || '📋', label: process.name });
-  if (company?.name) storyItems.push({ icon: '🏢', label: company.name });
+  if (process) storyItems.push({ icon: process.emoji || 'ðŸ“‹', label: process.name });
+  if (company?.name) storyItems.push({ icon: 'ðŸ¢', label: company.name });
   const techList = typeof window !== 'undefined'
     ? Object.values(JSON.parse(sessionStorage.getItem('demo_tech') || '{}')).flat().filter(t => t && t !== 'None')
     : [];
-  if (techList.length > 0) storyItems.push({ icon: '⚙️', label: `${techList.length} tools` });
+  if (techList.length > 0) storyItems.push({ icon: 'âš™ï¸', label: `${techList.length} tools` });
 
-  // ── Loading ──
+  // â”€â”€ Loading â”€â”€
   if (phase === 'loading') {
     return (
       <div style={{ maxWidth: 480, margin: '0 auto' }} className="animate-fade-in-up">
@@ -158,7 +158,7 @@ export default function DiscoverPage() {
               return (
                 <div key={stage.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', borderRadius: 4, background: done ? 'var(--c-grBg)' : 'var(--c-sf2)', border: `1px solid ${done ? 'var(--c-grBd)' : 'var(--c-b)'}` }}>
                   {done ? (
-                    <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--c-grBg)', color: 'var(--c-gr)', border: '1px solid var(--c-grBd)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, flexShrink: 0 }}>✓</span>
+                    <span style={{ width: 18, height: 18, borderRadius: '50%', background: 'var(--c-grBg)', color: 'var(--c-gr)', border: '1px solid var(--c-grBd)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, flexShrink: 0 }}>âœ“</span>
                   ) : active ? (
                     <div style={{ width: 18, height: 18, border: '2px solid var(--c-pu)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', flexShrink: 0 }} />
                   ) : (
@@ -175,7 +175,7 @@ export default function DiscoverPage() {
     );
   }
 
-  // ── Error ──
+  // â”€â”€ Error â”€â”€
   if (phase === 'error') {
     return (
       <div className="max-w-md mx-auto animate-fade-in-up">
@@ -183,13 +183,13 @@ export default function DiscoverPage() {
         <StoryContext items={storyItems} />
         <div className="text-center py-8">
           <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-4 border border-red-200">
-            <span className="text-2xl">⚠️</span>
+            <span className="text-2xl">âš ï¸</span>
           </div>
           <h2 className="text-xl font-bold text-slate-800 mb-2">Discovery hit a roadblock</h2>
           <p className="text-sm text-slate-400 mb-6">{error}</p>
           <div className="flex gap-3 justify-center">
             <button onClick={() => router.push('/input')} className="px-5 py-2.5 border border-slate-200 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
-              ← Back to tools
+              â† Back to tools
             </button>
             <button onClick={retryDiscovery} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors shadow-sm">
               Try again
@@ -213,11 +213,11 @@ export default function DiscoverPage() {
 
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-        <button className="btn-back" onClick={() => router.push('/input')}>←</button>
+        <button className="btn-back" onClick={() => router.push('/input')}>â†</button>
         <div>
           <p className="section-tag" style={{ marginBottom: 2 }}>Automation Analysis</p>
           <h1 style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-tx)', letterSpacing: '-0.01em' }}>
-            {company?.name ? `${company.name} — ` : ''}Coverage assessment
+            {company?.name ? `${company.name} â€” ` : ''}Coverage assessment
           </h1>
         </div>
       </div>
@@ -279,7 +279,7 @@ export default function DiscoverPage() {
 
       {/* Stage heatmap */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-4">
-        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">The full picture — stage by stage</h2>
+        <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">The full picture â€” stage by stage</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 stagger-children">
           {(discovery.stageScores || []).map(stage => {
             const c = scoreColor(stage.score);
@@ -326,7 +326,7 @@ export default function DiscoverPage() {
                     className="w-full flex items-center justify-between px-3.5 py-2 border-t border-white/50 text-[9px] font-bold text-slate-400 hover:bg-white/30 transition-colors"
                   >
                     <span>{stage.activities.length} activities rated</span>
-                    <span className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}>▾</span>
+                    <span className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}>â–¾</span>
                   </button>
                 )}
 
@@ -369,9 +369,9 @@ export default function DiscoverPage() {
         </div>
 
         <div className="flex gap-4 mt-4 text-[10px] text-slate-400">
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-400" /> &lt;40% — needs attention</div>
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-400" /> 40–70% — room to grow</div>
-          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> &gt;70% — well covered</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-red-400" /> &lt;40% â€” needs attention</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-400" /> 40â€“70% â€” room to grow</div>
+          <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> &gt;70% â€” well covered</div>
         </div>
       </div>
 
@@ -385,16 +385,16 @@ export default function DiscoverPage() {
             <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
               What the AI noticed ({(discovery.insights || []).length} insights)
             </h2>
-            <span className={`text-slate-400 text-xs transition-transform ${expandedInsights ? 'rotate-180' : ''}`}>▾</span>
+            <span className={`text-slate-400 text-xs transition-transform ${expandedInsights ? 'rotate-180' : ''}`}>â–¾</span>
           </button>
           {expandedInsights && (
             <div className="px-5 pb-4 border-t border-slate-100 animate-slide-down">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
                 {(discovery.insights || []).map((ins, i) => {
-                  const icons = { Opportunity: '🟢', Risk: '🔴', Action: '🔵', Watch: '🟡', Insight: '⚪' };
+                  const icons = { Opportunity: 'ðŸŸ¢', Risk: 'ðŸ”´', Action: 'ðŸ”µ', Watch: 'ðŸŸ¡', Insight: 'âšª' };
                   return (
                     <div key={i} className="flex items-start gap-2.5 p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="text-xs flex-shrink-0 mt-0.5">{icons[ins.type] || '⚪'}</span>
+                      <span className="text-xs flex-shrink-0 mt-0.5">{icons[ins.type] || 'âšª'}</span>
                       <div>
                         <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{ins.type}</span>
                         <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">{ins.text}</p>
@@ -415,10 +415,10 @@ export default function DiscoverPage() {
             <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>Analysis Complete</p>
             <h2 className="text-base font-bold mb-1">
               {discovery.overallScore >= 70
-                ? 'Strong coverage — optimisation opportunities identified'
+                ? 'Strong coverage â€” optimisation opportunities identified'
                 : discovery.overallScore >= 40
-                ? 'Developing maturity — clear automation pathway available'
-                : 'Significant headroom — high-value opportunities scoped'}
+                ? 'Developing maturity â€” clear automation pathway available'
+                : 'Significant headroom â€” high-value opportunities scoped'}
             </h2>
             <p className="text-purple-100 text-sm">
               A phased implementation roadmap with scoped agents for each gap.
@@ -428,7 +428,7 @@ export default function DiscoverPage() {
             onClick={goToPlan}
             className="bg-white text-purple-700 font-bold px-6 py-3 rounded-xl text-sm hover:bg-purple-50 transition-colors shadow-sm whitespace-nowrap flex-shrink-0"
           >
-            View Roadmap →
+            View Roadmap â†’
           </button>
         </div>
       </div>
