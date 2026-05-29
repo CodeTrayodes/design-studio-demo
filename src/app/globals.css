@@ -180,10 +180,18 @@ html, body {
 
 /* ─── Focus ring ──────────────────────────────────────────────────────────── */
 
+/* Only show focus rings on keyboard navigation, not mouse clicks */
 :focus-visible {
   outline: 2px solid #F5A623;
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Plain inputs inside underline-style containers — never show a ring */
+input.focus\:outline-none:focus,
+input.focus\:ring-0:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* ─── Legacy component classes (existing pages) ───────────────────────────── */

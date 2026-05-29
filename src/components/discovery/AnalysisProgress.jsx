@@ -5,12 +5,15 @@ import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const STAGES = [
-  { id: 1, label: 'Scanning process topology',     duration: 2200 },
-  { id: 2, label: 'Identifying decision gates',     duration: 2800 },
-  { id: 3, label: 'Mapping tool dependencies',      duration: 2400 },
-  { id: 4, label: 'Calculating cycle times',        duration: 3000 },
-  { id: 5, label: 'Benchmarking against industry',  duration: 2600 },
-  { id: 6, label: 'Generating optimisation model',  duration: 0    }, // gated on apiReady
+  { id: 1,  label: 'Scanning process topology',       duration: 1800 },
+  { id: 2,  label: 'Identifying decision gates',       duration: 2000 },
+  { id: 3,  label: 'Mapping tool dependencies',        duration: 1900 },
+  { id: 4,  label: 'Calculating cycle times',          duration: 2200 },
+  { id: 5,  label: 'Detecting automation gaps',        duration: 2000 },
+  { id: 6,  label: 'Scoring maturity dimensions',      duration: 2100 },
+  { id: 7,  label: 'Benchmarking against industry',    duration: 2400 },
+  { id: 8,  label: 'Building agent deployment plan',   duration: 2200 },
+  { id: 9,  label: 'Generating optimisation model',    duration: 0    }, // gated on apiReady
 ];
 
 const LAST = STAGES.length - 1;
@@ -18,26 +21,58 @@ const LAST = STAGES.length - 1;
 export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
   const [currentStage, setCurrentStage] = useState(0);
   const [completed,    setCompleted]    = useState([]);
-  // tracks whether the last stage has been reached by the timer loop
-  const lastReached = useRef(false);
 
-  /* ── Timer loop: runs stages 0 → LAST-1 automatically ─────────────────── */
+  // Use refs to avoid stale closures in async callbacks
+  const apiReadyRef      = useRef(false);
+  const lastReachedRef   = useRef(false);
+  const completedFlagRef = useRef(false); // prevent double-completion
+  const onCompleteRef    = useRef(onComplete);
+
+  // Keep onCompleteRef and apiReadyRef in sync with latest props/values
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
+  useEffect(() => {
+    apiReadyRef.current = apiReady;
+    // If last stage already reached and API just became ready, complete now
+    if (apiReady && lastReachedRef.current) {
+      scheduleComplete();
+    }
+  }, [apiReady]);
+
+  function scheduleComplete() {
+    if (completedFlagRef.current) return; // already fired
+    completedFlagRef.current = true;
+    setCompleted(p => (p.includes(LAST) ? p : [...p, LAST]));
+    setTimeout(() => onCompleteRef.current?.(), 600);
+  }
+
+  /* ── Timer loop: auto-advances stages 0 → LAST-1 ─────────────────────── */
   useEffect(() => {
     let idx = 0;
-    let timer;
+    let stageTimer;
+    let fallbackTimer;
 
     function advance() {
       if (idx >= STAGES.length) return;
-
       setCurrentStage(idx);
 
       if (idx === LAST) {
-        // Last stage: mark as reached, completion gated on apiReady
-        lastReached.current = true;
+        lastReachedRef.current = true;
+
+        // If API already ready when we hit the last stage, complete immediately
+        if (apiReadyRef.current) {
+          scheduleComplete();
+          return;
+        }
+
+        // Fallback: force-complete after 60s if API never responds
+        fallbackTimer = setTimeout(() => {
+          console.warn('[DS] Analysis API timeout — forcing completion');
+          scheduleComplete();
+        }, 60_000);
         return;
       }
 
-      timer = setTimeout(() => {
+      stageTimer = setTimeout(() => {
         setCompleted(p => [...p, idx]);
         idx++;
         advance();
@@ -45,22 +80,11 @@ export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
     }
 
     advance();
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(stageTimer);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
-
-  /* ── Gate last stage completion on apiReady ─────────────────────────── */
-  useEffect(() => {
-    if (!apiReady) return;
-    if (!lastReached.current) return;              // timer hasn't reached last stage yet
-    if (completed.includes(LAST)) return;          // already completed
-
-    const t = setTimeout(() => {
-      setCompleted(p => [...p, LAST]);
-      setTimeout(() => onComplete?.(), 500);
-    }, 600);
-
-    return () => clearTimeout(t);
-  }, [apiReady, currentStage]); // re-check when currentStage changes (fast API case)
 
   const progress = Math.round((completed.length / STAGES.length) * 100);
 
@@ -80,22 +104,23 @@ export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
         <motion.div
           className="h-full bg-gradient-to-r from-[#F5A623] to-[#FF6B35] rounded-full"
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
         />
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {STAGES.map((stage, i) => {
-          const isDone   = completed.includes(i);
-          const isActive = currentStage === i && !isDone;
-          const isPaused = isActive && i === LAST && !apiReady;
+          const isDone    = completed.includes(i);
+          const isActive  = currentStage === i && !isDone;
+          const isPaused  = isActive && i === LAST && !apiReady;
 
           return (
             <div key={stage.id} className="flex items-center space-x-3">
               {/* Status dot */}
               <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
                 isDone   ? 'bg-[#30D5C8]'
-                : isActive ? (isPaused ? 'bg-[#F5A623]/50' : 'bg-[#F5A623] animate-pulse')
+                : isActive && !isPaused ? 'bg-[#F5A623] animate-pulse'
+                : isPaused ? 'bg-[#F5A623]/30'
                 : isDark  ? 'bg-[#3A3A3C]' : 'bg-[#E6E2DB]'
               }`}>
                 {isDone
@@ -108,17 +133,20 @@ export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
 
               <span className={`text-xs font-sans flex-1 transition-colors ${
                 isDone   ? isDark ? 'text-[#30D5C8]' : 'text-[#1AB5A8]'
-                : isActive ? 'text-[#F5A623]'
-                : isDark  ? 'text-[#8E8E93]/60' : 'text-[#3D3D44]/50'
+                : isActive && !isPaused ? 'text-[#F5A623]'
+                : isPaused ? isDark ? 'text-[#F5A623]/50' : 'text-[#F5A623]/70'
+                : isDark  ? 'text-[#8E8E93]/50' : 'text-[#3D3D44]/40'
               }`}>
                 {stage.label}
                 {isPaused && (
-                  <span className="text-[#8E8E93] text-[10px] font-mono ml-2">— awaiting data...</span>
+                  <span className={`font-mono text-[10px] ml-2 ${isDark ? 'text-[#8E8E93]/50' : 'text-[#3D3D44]/50'}`}>
+                    — awaiting results...
+                  </span>
                 )}
               </span>
 
               {isActive && !isPaused && (
-                <div className="flex space-x-0.5">
+                <div className="flex space-x-0.5 shrink-0">
                   {[0, 0.2, 0.4].map(d => (
                     <span
                       key={d}

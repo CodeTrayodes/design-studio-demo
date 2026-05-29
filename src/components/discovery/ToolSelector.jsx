@@ -1,18 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { TOOL_CATEGORIES } from '@/lib/toolCategories';
 
-export default function ToolSelector({ isDark, onConfirm }) {
+/* Build initial selection from research-inferred tech stack.
+   inferredStack shape: { crm: "Salesforce", erp: "SAP S/4HANA", ... }
+   OR { crm: ["Salesforce", "HubSpot"], ... } */
+function buildInitialSelected(inferredStack) {
+  if (!inferredStack || typeof inferredStack !== 'object') return {};
+  const result = {};
+  for (const [catId, value] of Object.entries(inferredStack)) {
+    const names = Array.isArray(value) ? value : [value];
+    const cat   = TOOL_CATEGORIES.find(c => c.id === catId);
+    if (!cat) continue;
+    const matchedIds = new Set(
+      names
+        .map(name => cat.tools.find(t => t.name.toLowerCase().includes(name.toLowerCase().slice(0, 6))))
+        ?.filter(Boolean)
+        .map(t => t.id) ?? []
+    );
+    if (matchedIds.size > 0) result[catId] = matchedIds;
+  }
+  return result;
+}
+
+export default function ToolSelector({ isDark, onConfirm, inferredStack }) {
+  const initialSelected = useMemo(() => buildInitialSelected(inferredStack), []);
+
   const [activeTab,   setActiveTab]   = useState(TOOL_CATEGORIES[0].id);
-  const [selected,    setSelected]    = useState({});   // { catId: Set<toolId> }
-  const [customTools, setCustomTools] = useState({});   // { catId: string[] }
+  const [selected,    setSelected]    = useState(initialSelected);
+  const [customTools, setCustomTools] = useState({});
   const [customInput, setCustomInput] = useState('');
   const [confirmed,   setConfirmed]   = useState(false);
 
-  const activeCategory = TOOL_CATEGORIES.find(c => c.id === activeTab);
+  const autoSelectedCount = Object.values(initialSelected).reduce((n, s) => n + s.size, 0);
+  const activeCategory    = TOOL_CATEGORIES.find(c => c.id === activeTab);
 
   function toggleTool(catId, toolId) {
     setSelected(prev => {
@@ -24,10 +48,7 @@ export default function ToolSelector({ isDark, onConfirm }) {
 
   function addCustom() {
     if (!customInput.trim()) return;
-    setCustomTools(prev => ({
-      ...prev,
-      [activeTab]: [...(prev[activeTab] || []), customInput.trim()],
-    }));
+    setCustomTools(prev => ({ ...prev, [activeTab]: [...(prev[activeTab] || []), customInput.trim()] }));
     setCustomInput('');
   }
 
@@ -35,11 +56,10 @@ export default function ToolSelector({ isDark, onConfirm }) {
     return Object.entries(selected)
       .filter(([, s]) => s.size > 0)
       .map(([catId, s]) => {
-        const cat   = TOOL_CATEGORIES.find(c => c.id === catId);
-        const names = [...s].map(id => cat.tools.find(t => t.id === id)?.name).filter(Boolean);
-        return names.join(', ');
+        const cat = TOOL_CATEGORIES.find(c => c.id === catId);
+        return [...s].map(id => cat?.tools.find(t => t.id === id)?.name).filter(Boolean);
       })
-      .filter(Boolean)
+      .flat()
       .join(' · ');
   }
 
@@ -48,8 +68,8 @@ export default function ToolSelector({ isDark, onConfirm }) {
     const result = {};
     for (const [catId, set] of Object.entries(selected)) {
       if (set.size === 0) continue;
-      const cat   = TOOL_CATEGORIES.find(c => c.id === catId);
-      result[catId] = [...set].map(id => cat.tools.find(t => t.id === id)?.name).filter(Boolean);
+      const cat = TOOL_CATEGORIES.find(c => c.id === catId);
+      result[catId] = [...set].map(id => cat?.tools.find(t => t.id === id)?.name).filter(Boolean);
     }
     for (const [catId, names] of Object.entries(customTools)) {
       result[catId] = [...(result[catId] || []), ...names];
@@ -72,9 +92,21 @@ export default function ToolSelector({ isDark, onConfirm }) {
 
   return (
     <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
+      {/* Auto-selected notice */}
+      {autoSelectedCount > 0 && (
+        <div className="px-4 pt-3 pb-0">
+          <p className={`text-[10px] font-mono flex items-center gap-1.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#30D5C8] inline-block" />
+            {autoSelectedCount} tool{autoSelectedCount > 1 ? 's' : ''} pre-selected based on your company profile — adjust as needed
+          </p>
+        </div>
+      )}
+
       {/* Category tabs */}
-      <div className={`flex overflow-x-auto border-b ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}
-        style={{ scrollbarWidth: 'none' }}>
+      <div
+        className={`flex overflow-x-auto border-b mt-3 ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}
+        style={{ scrollbarWidth: 'none' }}
+      >
         {TOOL_CATEGORIES.map(cat => {
           const count = (selected[cat.id]?.size || 0) + (customTools[cat.id]?.length || 0);
           return (
@@ -106,14 +138,15 @@ export default function ToolSelector({ isDark, onConfirm }) {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
           {activeCategory.tools.map(tool => {
-            const isSelected = selected[activeTab]?.has(tool.id);
+            const isSelected  = selected[activeTab]?.has(tool.id);
+            const wasInferred = initialSelected[activeTab]?.has(tool.id);
             return (
               <motion.button
                 key={tool.id}
                 onClick={() => toggleTool(activeTab, tool.id)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className={`flex items-center space-x-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`flex items-center space-x-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer relative ${
                   isSelected
                     ? 'border-[#F5A623] bg-[#F5A623]/10'
                     : isDark ? 'border-[#3A3A3C] hover:border-[#8E8E93]' : 'border-[#D5D0C8] hover:border-[#3D3D44]'
@@ -124,9 +157,12 @@ export default function ToolSelector({ isDark, onConfirm }) {
                 }`}>
                   {isSelected ? <Check size={10} /> : tool.logo}
                 </div>
-                <span className={`text-[11px] font-sans leading-tight ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
+                <span className={`text-[11px] font-sans leading-tight flex-1 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
                   {tool.name}
                 </span>
+                {wasInferred && !isSelected && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#30D5C8]/60 shrink-0" title="Suggested from profile" />
+                )}
               </motion.button>
             );
           })}

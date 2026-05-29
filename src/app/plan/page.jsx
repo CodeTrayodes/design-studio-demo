@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/lib/theme';
 
 const PHASE_STYLES = [
-  { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: 'text-[#F5A623]', badge: 'bg-[#F5A623]/10 text-[#F5A623]', label: 'Quick wins — build momentum' },
+  { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: 'text-[#F5A623]', badge: 'bg-[#F5A623]/10 text-[#F5A623]', label: 'Quick wins â€” build momentum' },
   { accent: '#30D5C8', light: 'bg-[#30D5C8]/8', border: 'border-[#30D5C8]/30', text: 'text-[#30D5C8]', badge: 'bg-[#30D5C8]/10 text-[#30D5C8]', label: 'Core transformation' },
   { accent: '#A78BFA', light: 'bg-[#A78BFA]/8', border: 'border-[#A78BFA]/30', text: 'text-[#A78BFA]', badge: 'bg-[#A78BFA]/10 text-[#A78BFA]', label: 'Advanced autonomy' },
 ];
@@ -53,7 +53,7 @@ function AgentCard({ agent, style, isDark }) {
       <p className={`text-[11px] font-sans leading-relaxed mb-2.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{agent.rationale}</p>
       <div className="flex items-center gap-2 flex-wrap">
         <span className={`text-[10px] font-mono font-semibold ${impactColor}`}>{agent.impact} Impact</span>
-        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>·</span>
+        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>Â·</span>
         <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{agent.effort}</span>
       </div>
     </div>
@@ -78,17 +78,17 @@ export default function PlanPage() {
     if (ran.current) return;
     ran.current = true;
 
-    const p  = JSON.parse(sessionStorage.getItem('demo_process')   ?? 'null');
-    const d  = JSON.parse(sessionStorage.getItem('demo_discovery') ?? 'null');
-    const co = JSON.parse(sessionStorage.getItem('demo_company')   ?? 'null');
-    const tech = JSON.parse(sessionStorage.getItem('demo_tech')    ?? '{}');
+    const p  = JSON.parse(localStorage.getItem('demo_process')   ?? 'null');
+    const d  = JSON.parse(localStorage.getItem('demo_discovery') ?? 'null');
+    const co = JSON.parse(localStorage.getItem('demo_company')   ?? 'null');
+    const tech = JSON.parse(localStorage.getItem('demo_tech')    ?? '{}');
 
     if (!p || !d) { router.push('/'); return; }
     setProcess(p);
     setDiscovery(d);
     setCompany(co);
 
-    const cached = sessionStorage.getItem('demo_plan');
+    const cached = localStorage.getItem('demo_plan');
     if (cached) {
       setPlan(JSON.parse(cached));
       setPagePhase('done');
@@ -108,7 +108,7 @@ export default function PlanPage() {
       if (!res.ok) throw new Error('Plan API error');
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      sessionStorage.setItem('demo_plan', JSON.stringify(data));
+      localStorage.setItem('demo_plan', JSON.stringify(data));
       setPlan(data);
       setPagePhase('done');
     } catch (e) {
@@ -118,8 +118,8 @@ export default function PlanPage() {
   }
 
   function downloadMarkdown() {
-    const techList = Object.values(JSON.parse(sessionStorage.getItem('demo_tech') ?? '{}')).flat().filter(Boolean);
-    let md = `# ${process?.name} — AI Activation Roadmap\n\n`;
+    const techList = Object.values(JSON.parse(localStorage.getItem('demo_tech') ?? '{}')).flat().filter(Boolean);
+    let md = `# ${process?.name} â€” AI Activation Roadmap\n\n`;
     if (company?.name) md += `**Company:** ${company.name}  \n`;
     md += `**Coverage:** ${discovery?.overallScore ?? 0}%  \n`;
     md += `**Generated:** ${new Date().toLocaleDateString()}  \n\n---\n\n`;
@@ -144,13 +144,13 @@ export default function PlanPage() {
   }
 
   const techList = typeof window !== 'undefined'
-    ? Object.values(JSON.parse(sessionStorage.getItem('demo_tech') ?? '{}')).flat().filter(t => t && t !== 'None')
+    ? Object.values(JSON.parse(localStorage.getItem('demo_tech') ?? '{}')).flat().filter(t => t && t !== 'None')
     : [];
 
   const overallScore = discovery?.overallScore ?? 0;
   const totalAgents  = (plan?.phases ?? []).reduce((n, ph) => n + (ph.agents?.length ?? 0), 0);
 
-  /* ── Loading ── */
+  /* â”€â”€ Loading â”€â”€ */
   if (pagePhase === 'loading') {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-[#0B0B0E]' : 'bg-[#F3F1EC]'}`}>
@@ -170,7 +170,7 @@ export default function PlanPage() {
     );
   }
 
-  /* ── Error ── */
+  /* â”€â”€ Error â”€â”€ */
   if (pagePhase === 'error') {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
@@ -178,7 +178,7 @@ export default function PlanPage() {
           <p className="text-[#F5A623] font-mono text-xs uppercase tracking-widest mb-2">Error</p>
           <p className={`text-sm mb-4 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{error}</p>
           <button onClick={() => router.push('/')} className="text-xs font-mono text-[#F5A623] hover:underline">
-            ← Start over
+            â† Start over
           </button>
         </div>
       </div>
@@ -191,7 +191,7 @@ export default function PlanPage() {
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
       <div className="max-w-5xl mx-auto px-4 py-8 pb-16">
 
-        {/* ── Header ── */}
+        {/* â”€â”€ Header â”€â”€ */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
             <button onClick={() => router.push('/')} className={`text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 mb-1 transition-colors ${isDark ? 'text-[#8E8E93] hover:text-[#F5A623]' : 'text-[#3D3D44] hover:text-[#F5A623]'}`}>
@@ -203,7 +203,7 @@ export default function PlanPage() {
             </h1>
             {company?.name && (
               <p className={`font-mono text-xs mt-1 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-                {company.name} · 3-phase implementation plan
+                {company.name} Â· 3-phase implementation plan
               </p>
             )}
           </div>
@@ -223,7 +223,7 @@ export default function PlanPage() {
           </div>
         </div>
 
-        {/* ── Stats ── */}
+        {/* â”€â”€ Stats â”€â”€ */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
             { label: 'Current Coverage', value: `${overallScore}%`, sub: overallScore >= 70 ? 'Strong' : overallScore >= 40 ? 'Developing' : 'Early stage', accent: scoreBarColor(overallScore) },
@@ -239,7 +239,7 @@ export default function PlanPage() {
           ))}
         </div>
 
-        {/* ── Plan summary ── */}
+        {/* â”€â”€ Plan summary â”€â”€ */}
         {plan.summary && (
           <div className={`rounded-2xl border p-5 mb-6 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">The big picture</p>
@@ -247,7 +247,7 @@ export default function PlanPage() {
           </div>
         )}
 
-        {/* ── Stage filter ── */}
+        {/* â”€â”€ Stage filter â”€â”€ */}
         {(discovery?.stageScores ?? []).length > 0 && (
           <div className="mb-5">
             <div className="flex items-center gap-3 mb-3">
@@ -285,7 +285,7 @@ export default function PlanPage() {
           </div>
         )}
 
-        {/* ── Key Insights ── */}
+        {/* â”€â”€ Key Insights â”€â”€ */}
         {(discovery?.insights ?? []).length > 0 && (
           <div className={`rounded-2xl border overflow-hidden mb-6 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
             <button
@@ -329,7 +329,7 @@ export default function PlanPage() {
           </div>
         )}
 
-        {/* ── 3-Phase Roadmap ── */}
+        {/* â”€â”€ 3-Phase Roadmap â”€â”€ */}
         <p className={`text-[10px] font-mono uppercase tracking-widest mb-4 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
           3-Phase AI Activation Roadmap
         </p>
@@ -376,12 +376,12 @@ export default function PlanPage() {
           })}
         </div>
 
-        {/* ── Footer CTA ── */}
+        {/* â”€â”€ Footer CTA â”€â”€ */}
         <div className="rounded-2xl p-6 bg-gradient-to-tr from-[#F5A623]/15 to-[#FF6B35]/5 border border-[#F5A623]/20">
           <div className="text-center max-w-lg mx-auto">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Assessment Complete</p>
             <h2 className={`font-serif text-xl font-normal mb-2 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
-              {overallScore}% automation coverage — roadmap ready
+              {overallScore}% automation coverage â€” roadmap ready
             </h2>
             <p className={`text-xs font-sans mb-5 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
               {(discovery?.stageScores ?? []).length} stages assessed{company?.name ? ` for ${company.name}` : ''}.
@@ -414,3 +414,4 @@ export default function PlanPage() {
     </div>
   );
 }
+

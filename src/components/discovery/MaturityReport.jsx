@@ -24,7 +24,7 @@ function MaturityBar({ value, isDark }) {
 
 export default function MaturityReport({ data, isDark }) {
   function openRoadmap() {
-    window.open('/plan', '_blank', 'noopener');
+    window.open('/roadmap', '_blank', 'noopener');
   }
 
   function openFullAnalysis() {

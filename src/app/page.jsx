@@ -42,7 +42,7 @@ function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) 
     >
       <motion.p
         variants={fadeUp}
-        className={`font-serif text-lg md:text-[22px] font-normal italic opacity-70 mb-5 select-none ${
+        className={`font-serif text-xl md:text-[24px] font-normal italic opacity-80 mb-5 select-none ${
           isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'
         }`}
       >
@@ -199,6 +199,7 @@ export default function DiscoveryPage() {
               messages={conv.messages}
               streaming={conv.streaming}
               isDark={isDark}
+              onOrgConfirm={conv.confirmOrg}
               onToolsConfirm={conv.confirmTools}
               onContextConfirm={conv.confirmContext}
               onAnalysisDone={conv.runAnalysis}

@@ -170,8 +170,13 @@ function QuestionnaireForm({ isDark, onSubmit }) {
 }
 
 function BenchmarkForm({ isDark, onSubmit }) {
-  const industries = ['Technology', 'Financial Services', 'Healthcare', 'Manufacturing', 'Retail', 'Professional Services', 'Energy', 'Logistics'];
+  const INDUSTRIES = ['Technology', 'Financial Services', 'Healthcare', 'Manufacturing', 'Retail', 'Professional Services', 'Energy & Utilities', 'Logistics'];
   const [industry, setIndustry] = useState('');
+  const [custom,   setCustom]   = useState('');
+  const [showCustom, setShowCustom] = useState(false);
+
+  const finalIndustry = showCustom ? custom.trim() : industry;
+  const ready = finalIndustry.length > 1;
 
   return (
     <div className="space-y-3">
@@ -179,12 +184,12 @@ function BenchmarkForm({ isDark, onSubmit }) {
         We will apply industry-standard benchmarks for your sector. Select your industry for the most accurate baseline.
       </p>
       <div className="grid grid-cols-2 gap-2">
-        {industries.map(ind => (
+        {INDUSTRIES.map(ind => (
           <button
             key={ind}
-            onClick={() => setIndustry(ind)}
+            onClick={() => { setIndustry(ind); setShowCustom(false); }}
             className={`text-xs py-2 px-3 rounded-lg border text-left transition-all cursor-pointer ${
-              industry === ind
+              industry === ind && !showCustom
                 ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]'
                 : isDark ? 'border-[#3A3A3C] text-[#8E8E93] hover:border-[#8E8E93]' : 'border-[#D5D0C8] text-[#3D3D44] hover:border-[#3D3D44]'
             }`}
@@ -192,12 +197,37 @@ function BenchmarkForm({ isDark, onSubmit }) {
             {ind}
           </button>
         ))}
+        <button
+          onClick={() => { setShowCustom(true); setIndustry(''); }}
+          className={`text-xs py-2 px-3 rounded-lg border text-left transition-all cursor-pointer ${
+            showCustom
+              ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]'
+              : isDark ? 'border-[#3A3A3C] border-dashed text-[#8E8E93] hover:border-[#8E8E93]' : 'border-[#D5D0C8] border-dashed text-[#3D3D44] hover:border-[#3D3D44]'
+          }`}
+        >
+          + Other
+        </button>
       </div>
+
+      {showCustom && (
+        <div className={`border-b pb-1.5 transition-all focus-within:border-[#F5A623] ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}>
+          <input
+            autoFocus
+            value={custom}
+            onChange={e => setCustom(e.target.value)}
+            placeholder="e.g. Legal Services, Agriculture..."
+            className={`w-full bg-transparent border-none outline-none text-xs font-sans ${
+              isDark ? 'text-white placeholder-[#8E8E93]/40' : 'text-[#18181A] placeholder-[#3D3D44]/40'
+            }`}
+          />
+        </div>
+      )}
+
       <button
-        onClick={() => onSubmit({ industry })}
-        disabled={!industry}
+        onClick={() => onSubmit({ industry: finalIndustry })}
+        disabled={!ready}
         className={`w-full py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-          industry
+          ready
             ? 'bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black hover:scale-[1.01]'
             : isDark ? 'bg-[#3A3A3C] text-[#8E8E93] cursor-not-allowed' : 'bg-[#E6E2DB] text-[#3D3D44] cursor-not-allowed'
         }`}

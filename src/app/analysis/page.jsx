@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Download, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 
-/* ── helpers ─────────────────────────────────────────────────────────────── */
+/* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function maturityScore(score) {
   return parseFloat(((score ?? 50) / 100 * 5).toFixed(1));
@@ -24,7 +24,7 @@ function priorityBadge(p) {
 }
 
 const PHASE_STYLES = [
-  { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: 'text-[#F5A623]', badge: 'bg-[#F5A623]/10 text-[#F5A623]', label: 'Quick wins — build momentum' },
+  { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: 'text-[#F5A623]', badge: 'bg-[#F5A623]/10 text-[#F5A623]', label: 'Quick wins â€” build momentum' },
   { accent: '#30D5C8', light: 'bg-[#30D5C8]/8', border: 'border-[#30D5C8]/30', text: 'text-[#30D5C8]', badge: 'bg-[#30D5C8]/10 text-[#30D5C8]', label: 'Core transformation' },
   { accent: '#A78BFA', light: 'bg-[#A78BFA]/8', border: 'border-[#A78BFA]/30', text: 'text-[#A78BFA]', badge: 'bg-[#A78BFA]/10 text-[#A78BFA]', label: 'Advanced autonomy' },
 ];
@@ -37,13 +37,13 @@ const INSIGHT_STYLES = {
   Insight:     'bg-[#8E8E93]/8 border-[#8E8E93]/25 text-[#8E8E93]',
 };
 
-/* ── Markdown generator ──────────────────────────────────────────────────── */
+/* â”€â”€ Markdown generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function buildMarkdown(process, company, discovery, plan) {
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const maturity = maturityScore(discovery?.overallScore);
 
-  let md = `# ${process?.name} — Process Maturity Analysis\n\n`;
+  let md = `# ${process?.name} â€” Process Maturity Analysis\n\n`;
   if (company?.name) md += `**Company:** ${company.name}  \n`;
   md += `**Generated:** ${date}  \n`;
   md += `**Overall Maturity:** ${maturity}/5.0 (${discovery?.overallScore ?? 0}% automation coverage)  \n\n`;
@@ -90,7 +90,7 @@ function buildMarkdown(process, company, discovery, plan) {
   return md;
 }
 
-/* ── Sub-components ──────────────────────────────────────────────────────── */
+/* â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function StatCard({ label, value, sub, accent, isDark }) {
   return (
@@ -139,7 +139,7 @@ function StageCard({ stage, isDark }) {
             {maturityScore(stage.score).toFixed(1)}
           </span>
           <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-            /5.0 · {stage.phase}
+            /5.0 Â· {stage.phase}
           </span>
         </div>
 
@@ -231,14 +231,14 @@ function AgentCard({ agent, style, isDark }) {
       <p className={`text-[11px] font-sans leading-relaxed mb-2.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{agent.rationale}</p>
       <div className="flex items-center gap-2 flex-wrap">
         <span className={`text-[10px] font-mono font-semibold ${impactColor}`}>{agent.impact} Impact</span>
-        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>·</span>
+        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>Â·</span>
         <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{agent.effort}</span>
       </div>
     </div>
   );
 }
 
-/* ── Main page ───────────────────────────────────────────────────────────── */
+/* â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 export default function AnalysisPage() {
   const { isDark } = useTheme();
@@ -257,10 +257,10 @@ export default function AnalysisPage() {
     if (ran.current) return;
     ran.current = true;
 
-    const p  = JSON.parse(sessionStorage.getItem('demo_process')   ?? 'null');
-    const co = JSON.parse(sessionStorage.getItem('demo_company')   ?? 'null');
-    const d  = JSON.parse(sessionStorage.getItem('demo_discovery') ?? 'null');
-    const pl = JSON.parse(sessionStorage.getItem('demo_plan')      ?? 'null');
+    const p  = JSON.parse(localStorage.getItem('demo_process')   ?? 'null');
+    const co = JSON.parse(localStorage.getItem('demo_company')   ?? 'null');
+    const d  = JSON.parse(localStorage.getItem('demo_discovery') ?? 'null');
+    const pl = JSON.parse(localStorage.getItem('demo_plan')      ?? 'null');
 
     if (p) setProcess(p);
     if (co) setCompany(co);
@@ -286,7 +286,7 @@ export default function AnalysisPage() {
   }
 
   const techList = ready
-    ? Object.values(JSON.parse(sessionStorage.getItem('demo_tech') ?? '{}')).flat().filter(Boolean)
+    ? Object.values(JSON.parse(localStorage.getItem('demo_tech') ?? '{}')).flat().filter(Boolean)
     : [];
 
   const overallScore    = discovery?.overallScore ?? 0;
@@ -306,7 +306,7 @@ export default function AnalysisPage() {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center gap-4 ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
         <p className="font-serif text-lg">No analysis data found.</p>
-        <a href="/" className="text-[#F5A623] text-sm font-mono hover:underline">← Start a new audit</a>
+        <a href="/" className="text-[#F5A623] text-sm font-mono hover:underline">â† Start a new audit</a>
       </div>
     );
   }
@@ -315,7 +315,7 @@ export default function AnalysisPage() {
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
       <div className="max-w-5xl mx-auto px-4 py-8 pb-16">
 
-        {/* ── Page header ── */}
+        {/* â”€â”€ Page header â”€â”€ */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -331,13 +331,13 @@ export default function AnalysisPage() {
             </h1>
             {company?.name && (
               <p className={`font-mono text-xs mt-1 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-                {company.name} · {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {company.name} Â· {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
-              onClick={() => window.open('/plan', '_blank', 'noopener')}
+              onClick={() => window.open('/roadmap', '_blank', 'noopener')}
               className={`px-4 py-2 rounded-xl text-xs font-mono border transition-all cursor-pointer flex items-center gap-1.5 ${
                 isDark ? 'border-[#3A3A3C] text-[#8E8E93] hover:border-[#F5A623]/40 hover:text-[#F5A623]' : 'border-[#D5D0C8] text-[#3D3D44] hover:text-[#F5A623]'
               }`}
@@ -353,7 +353,7 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* ── Stat cards ── */}
+        {/* â”€â”€ Stat cards â”€â”€ */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           <StatCard label="Overall Maturity" value={`${overallMaturity}/5.0`} sub={`${overallScore}% coverage`} accent="#F5A623" isDark={isDark} />
           <StatCard label="Critical Gaps"    value={highPriority}              sub="high priority stages"        accent="#EF4444" isDark={isDark} />
@@ -361,7 +361,7 @@ export default function AnalysisPage() {
           <StatCard label="Time to Value"    value="24 wks"                    sub="full deployment"             accent="#A78BFA" isDark={isDark} />
         </div>
 
-        {/* ── Executive Summary ── */}
+        {/* â”€â”€ Executive Summary â”€â”€ */}
         <div className={`rounded-2xl border p-5 mb-6 border-l-2 border-l-[#F5A623] ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
           <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Executive Summary</p>
           <p className={`text-sm font-serif leading-relaxed ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>{discovery.executiveSummary}</p>
@@ -376,7 +376,7 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* ── Stage breakdown ── */}
+        {/* â”€â”€ Stage breakdown â”€â”€ */}
         <div className="mb-6">
           <p className={`text-[10px] font-mono uppercase tracking-widest mb-4 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
             Stage-by-stage breakdown
@@ -389,9 +389,9 @@ export default function AnalysisPage() {
           {/* Legend */}
           <div className="flex flex-wrap gap-4 mt-4">
             {[
-              { label: '<40% — needs attention', color: '#EF4444' },
-              { label: '40–70% — room to grow',  color: '#F5A623' },
-              { label: '>70% — well covered',     color: '#30D5C8' },
+              { label: '<40% â€” needs attention', color: '#EF4444' },
+              { label: '40â€“70% â€” room to grow',  color: '#F5A623' },
+              { label: '>70% â€” well covered',     color: '#30D5C8' },
             ].map(l => (
               <div key={l.label} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ background: l.color }} />
@@ -401,7 +401,7 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* ── Key Insights ── */}
+        {/* â”€â”€ Key Insights â”€â”€ */}
         {(discovery.insights ?? []).length > 0 && (
           <div className={`rounded-2xl border overflow-hidden mb-6 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
             <button
@@ -440,7 +440,7 @@ export default function AnalysisPage() {
           </div>
         )}
 
-        {/* ── Phase Roadmap ── */}
+        {/* â”€â”€ Phase Roadmap â”€â”€ */}
         {plan && (
           <>
             {/* Stage filter */}
@@ -542,12 +542,12 @@ export default function AnalysisPage() {
           </>
         )}
 
-        {/* ── Footer CTA ── */}
+        {/* â”€â”€ Footer CTA â”€â”€ */}
         <div className="rounded-2xl p-6 bg-gradient-to-tr from-[#F5A623]/15 to-[#FF6B35]/5 border border-[#F5A623]/20">
           <div className="text-center max-w-lg mx-auto">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Assessment Complete</p>
             <h2 className={`font-serif text-xl font-normal mb-2 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
-              {overallMaturity.toFixed(1)}/5.0 maturity — roadmap ready
+              {overallMaturity.toFixed(1)}/5.0 maturity â€” roadmap ready
             </h2>
             <p className={`text-xs font-sans mb-5 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
               {(discovery.stageScores ?? []).length} stages assessed{company?.name ? ` for ${company.name}` : ''}.
@@ -561,7 +561,7 @@ export default function AnalysisPage() {
                 <Download size={14} /> Download Report
               </button>
               <button
-                onClick={() => window.open('/plan', '_blank', 'noopener')}
+                onClick={() => window.open('/roadmap', '_blank', 'noopener')}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all ${
                   isDark ? 'border-[#3A3A3C] text-[#F1F1F3] hover:border-[#F5A623]/40' : 'border-[#D5D0C8] text-[#18181A] hover:border-[#F5A623]'
                 }`}
@@ -581,3 +581,5 @@ export default function AnalysisPage() {
     </div>
   );
 }
+
+

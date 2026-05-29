@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import OrgContextCard   from './OrgContextCard';
 import ToolSelector     from './ToolSelector';
 import ContextInput     from './ContextInput';
 import AnalysisProgress from './AnalysisProgress';
@@ -38,13 +39,20 @@ function UserBubble({ content, isDark }) {
 
 function AssistantBubble({
   message, isDark, isStreaming,
-  onToolsConfirm, onContextConfirm, onAnalysisDone,
+  onOrgConfirm, onToolsConfirm, onContextConfirm, onAnalysisDone,
   analysisResult, analysisApiReady,
 }) {
+  if (message.type === 'org-context') {
+    return (
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <OrgContextCard isDark={isDark} onConfirm={onOrgConfirm} />
+      </motion.div>
+    );
+  }
   if (message.type === 'tool-selection') {
     return (
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <ToolSelector isDark={isDark} onConfirm={onToolsConfirm} />
+        <ToolSelector isDark={isDark} onConfirm={onToolsConfirm} inferredStack={message.inferredStack} />
       </motion.div>
     );
   }
@@ -94,6 +102,7 @@ export default function ChatThread({
   messages,
   streaming,
   isDark,
+  onOrgConfirm,
   onToolsConfirm,
   onContextConfirm,
   onAnalysisDone,
@@ -118,6 +127,7 @@ export default function ChatThread({
               message={m}
               isDark={isDark}
               isStreaming={streaming && m === messages.at(-1)}
+              onOrgConfirm={onOrgConfirm}
               onToolsConfirm={onToolsConfirm}
               onContextConfirm={onContextConfirm}
               onAnalysisDone={onAnalysisDone}
