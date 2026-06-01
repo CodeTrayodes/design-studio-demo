@@ -8,7 +8,11 @@ const IMPACT_COLOR = { low: 'text-[#8E8E93]', medium: 'text-[#F5A623]', high: 't
 
 function MaturityBar({ value, isDark }) {
   const pct   = Math.min(100, (value / 5) * 100);
-  const color = value < 2 ? '#EF4444' : value < 3.5 ? '#F5A623' : '#30D5C8';
+  const color = value < 2
+    ? (isDark ? '#EF4444' : '#DC2626')
+    : value < 3.5
+    ? (isDark ? '#F5A623' : '#D4890A')
+    : (isDark ? '#30D5C8' : '#0D9488');
   return (
     <div className={`h-1.5 rounded-full overflow-hidden ${isDark ? 'bg-[#3A3A3C]' : 'bg-[#E6E2DB]'}`}>
       <motion.div
@@ -81,11 +85,17 @@ export default function MaturityReport({ data, isDark }) {
                   {stage.name}
                 </span>
                 <div className="flex items-center space-x-2 shrink-0">
-                  <span className={`text-[10px] font-mono ${EFFORT_COLOR[stage.effort] ?? 'text-[#8E8E93]'}`}>
+                  <span className={`text-[10px] font-mono ${
+                    stage.effort === 'low' ? (isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]')
+                    : stage.effort === 'medium' ? (isDark ? 'text-[#F5A623]' : 'text-[#D4890A]')
+                    : (isDark ? 'text-red-400' : 'text-red-600')
+                  }`}>
                     {stage.effort}
                   </span>
                   <span className={`text-[11px] font-mono font-semibold tabular-nums ${
-                    stage.maturity < 2 ? 'text-red-400' : stage.maturity < 3.5 ? 'text-[#F5A623]' : 'text-[#30D5C8]'
+                    stage.maturity < 2 ? (isDark ? 'text-red-400' : 'text-red-600')
+                    : stage.maturity < 3.5 ? (isDark ? 'text-[#F5A623]' : 'text-[#D4890A]')
+                    : (isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]')
                   }`}>
                     {stage.maturity?.toFixed(1)}
                   </span>

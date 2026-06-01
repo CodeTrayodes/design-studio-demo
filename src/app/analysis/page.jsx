@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,31 +11,58 @@ function maturityScore(score) {
   return parseFloat(((score ?? 50) / 100 * 5).toFixed(1));
 }
 
-function scoreColor(score) {
-  if (score >= 70) return { bar: '#30D5C8', text: 'text-[#30D5C8]', badge: 'bg-[#30D5C8]/10 text-[#30D5C8] border-[#30D5C8]/30' };
-  if (score >= 40) return { bar: '#F5A623', text: 'text-[#F5A623]', badge: 'bg-[#F5A623]/10 text-[#F5A623] border-[#F5A623]/30' };
-  return { bar: '#EF4444', text: 'text-red-400', badge: 'bg-red-400/10 text-red-400 border-red-400/30' };
+function getContrastColor(color, isDark) {
+  if (isDark) return color;
+  if (color === '#30D5C8') return '#0D9488'; // Darker teal
+  if (color === '#F5A623') return '#D4890A'; // Darker orange/amber
+  if (color === '#A78BFA') return '#6D28D9'; // Darker purple/violet
+  if (color === '#EF4444') return '#DC2626'; // Darker red
+  return color;
 }
 
-function priorityBadge(p) {
-  if (p === 'HIGH')   return 'bg-red-400/10 text-red-400 border border-red-400/30';
-  if (p === 'LOW')    return 'bg-[#30D5C8]/10 text-[#30D5C8] border border-[#30D5C8]/30';
-  return 'bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/30';
+function scoreColor(score, isDark) {
+  if (score >= 70) return {
+    bar: '#30D5C8',
+    text: isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]',
+    badge: isDark ? 'bg-[#30D5C8]/10 text-[#30D5C8] border-[#30D5C8]/30' : 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/30'
+  };
+  if (score >= 40) return {
+    bar: '#F5A623',
+    text: isDark ? 'text-[#F5A623]' : 'text-[#D4890A]',
+    badge: isDark ? 'bg-[#F5A623]/10 text-[#F5A623] border-[#F5A623]/30' : 'bg-[#D4890A]/10 text-[#D4890A] border-[#D4890A]/30'
+  };
+  return {
+    bar: '#EF4444',
+    text: isDark ? 'text-red-400' : 'text-red-600',
+    badge: isDark ? 'bg-red-400/10 text-red-400 border-red-400/30' : 'bg-red-600/10 text-red-600 border-red-600/30'
+  };
 }
 
-const PHASE_STYLES = [
-  { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: 'text-[#F5A623]', badge: 'bg-[#F5A623]/10 text-[#F5A623]', label: 'Quick wins â€” build momentum' },
-  { accent: '#30D5C8', light: 'bg-[#30D5C8]/8', border: 'border-[#30D5C8]/30', text: 'text-[#30D5C8]', badge: 'bg-[#30D5C8]/10 text-[#30D5C8]', label: 'Core transformation' },
-  { accent: '#A78BFA', light: 'bg-[#A78BFA]/8', border: 'border-[#A78BFA]/30', text: 'text-[#A78BFA]', badge: 'bg-[#A78BFA]/10 text-[#A78BFA]', label: 'Advanced autonomy' },
-];
+function priorityBadge(p, isDark) {
+  if (p === 'HIGH')   return isDark ? 'bg-red-400/10 text-red-400 border border-red-400/30' : 'bg-red-600/10 text-red-600 border border-red-600/30';
+  if (p === 'LOW')    return isDark ? 'bg-[#30D5C8]/10 text-[#30D5C8] border border-[#30D5C8]/30' : 'bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/30';
+  return isDark ? 'bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/30' : 'bg-[#D4890A]/10 text-[#D4890A] border border-[#D4890A]/30';
+}
 
-const INSIGHT_STYLES = {
-  Opportunity: 'bg-[#30D5C8]/8 border-[#30D5C8]/25 text-[#30D5C8]',
-  Risk:        'bg-red-400/8 border-red-400/25 text-red-400',
-  Action:      'bg-[#F5A623]/8 border-[#F5A623]/25 text-[#F5A623]',
-  Watch:       'bg-[#A78BFA]/8 border-[#A78BFA]/25 text-[#A78BFA]',
-  Insight:     'bg-[#8E8E93]/8 border-[#8E8E93]/25 text-[#8E8E93]',
-};
+function getPhaseStyle(phIdx, isDark) {
+  const styles = [
+    { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: isDark ? 'text-[#F5A623]' : 'text-[#D4890A]', badge: isDark ? 'bg-[#F5A623]/10 text-[#F5A623]' : 'bg-[#D4890A]/10 text-[#D4890A]', label: 'Quick wins — build momentum' },
+    { accent: '#30D5C8', light: 'bg-[#30D5C8]/8', border: 'border-[#30D5C8]/30', text: isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]', badge: isDark ? 'bg-[#30D5C8]/10 text-[#30D5C8]' : 'bg-[#0D9488]/10 text-[#0D9488]', label: 'Core transformation' },
+    { accent: '#A78BFA', light: 'bg-[#A78BFA]/8', border: 'border-[#A78BFA]/30', text: isDark ? 'text-[#A78BFA]' : 'text-[#7C3AED]', badge: isDark ? 'bg-[#A78BFA]/10 text-[#A78BFA]' : 'bg-[#7C3AED]/10 text-[#7C3AED]', label: 'Advanced autonomy' },
+  ];
+  return styles[phIdx] ?? styles[0];
+}
+
+function getInsightStyle(type, isDark) {
+  const styles = {
+    Opportunity: isDark ? 'bg-[#30D5C8]/8 border-[#30D5C8]/25 text-[#30D5C8]' : 'bg-[#0D9488]/5 border-[#0D9488]/20 text-[#0D9488]',
+    Risk:        isDark ? 'bg-red-400/8 border-red-400/25 text-red-400'       : 'bg-red-600/5 border-red-600/20 text-red-600',
+    Action:      isDark ? 'bg-[#F5A623]/8 border-[#F5A623]/25 text-[#F5A623]' : 'bg-[#D4890A]/5 border-[#D4890A]/20 text-[#D4890A]',
+    Watch:       isDark ? 'bg-[#A78BFA]/8 border-[#A78BFA]/25 text-[#A78BFA]' : 'bg-[#7C3AED]/5 border-[#7C3AED]/20 text-[#7C3AED]',
+    Insight:     isDark ? 'bg-[#8E8E93]/8 border-[#8E8E93]/25 text-[#8E8E93]' : 'bg-[#3D3D44]/5 border-[#3D3D44]/20 text-[#3D3D44]',
+  };
+  return styles[type] ?? styles.Insight;
+}
 
 /* â”€â”€ Markdown generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
@@ -93,18 +120,19 @@ function buildMarkdown(process, company, discovery, plan) {
 /* â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 
 function StatCard({ label, value, sub, accent, isDark }) {
+  const displayAccent = getContrastColor(accent ?? '#F5A623', isDark);
   return (
     <div className={`rounded-xl border p-4 text-center ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
-      <div className="font-serif text-2xl font-medium tabular-nums" style={{ color: accent ?? '#F5A623' }}>{value}</div>
+      <div className="font-serif text-2xl font-medium tabular-nums" style={{ color: displayAccent }}>{value}</div>
       <div className={`text-[11px] font-sans font-medium mt-0.5 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>{label}</div>
-      <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{sub}</div>
+      <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#4B5563]'}`}>{sub}</div>
     </div>
   );
 }
 
 function StageCard({ stage, isDark }) {
   const [open, setOpen] = useState(false);
-  const c = scoreColor(stage.score);
+  const c = scoreColor(stage.score, isDark);
 
   const DIMS = [
     { key: 'pain',              label: 'Pain',    color: '#EF4444' },
@@ -114,11 +142,16 @@ function StageCard({ stage, isDark }) {
     { key: 'adoption',          label: 'Adopt',   color: '#F5A623' },
   ];
 
-  const ratingColor = {
+  const ratingColor = isDark ? {
     AUTOMATED:    'bg-[#30D5C8]/10 text-[#30D5C8]',
     PARTIAL:      'bg-[#F5A623]/10 text-[#F5A623]',
     MANUAL:       'bg-orange-400/10 text-orange-400',
     NOT_IN_PLACE: 'bg-red-400/10 text-red-400',
+  } : {
+    AUTOMATED:    'bg-[#0D9488]/10 text-[#0D9488]',
+    PARTIAL:      'bg-[#D4890A]/10 text-[#D4890A]',
+    MANUAL:       'bg-orange-600/10 text-orange-600',
+    NOT_IN_PLACE: 'bg-red-600/10 text-red-600',
   };
   const ratingShort = { AUTOMATED: 'AUTO', PARTIAL: 'PART', MANUAL: 'MAN', NOT_IN_PLACE: 'NONE' };
 
@@ -129,7 +162,7 @@ function StageCard({ stage, isDark }) {
           <h3 className={`text-xs font-semibold font-sans leading-snug flex-1 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
             {stage.stageName}
           </h3>
-          <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border shrink-0 ${priorityBadge(stage.priority)}`}>
+          <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border shrink-0 ${priorityBadge(stage.priority, isDark)}`}>
             {stage.priority}
           </span>
         </div>
@@ -207,7 +240,7 @@ function StageCard({ stage, isDark }) {
 }
 
 function AgentCard({ agent, style, isDark }) {
-  const impactColor = agent.impact === 'High' ? 'text-[#30D5C8]' : agent.impact === 'Low' ? 'text-[#8E8E93]' : 'text-[#F5A623]';
+  const impactColor = agent.impact === 'High' ? (isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]') : agent.impact === 'Low' ? 'text-[#8E8E93]' : (isDark ? 'text-[#F5A623]' : 'text-[#D4890A]');
   return (
     <div className={`rounded-xl border p-3.5 ${isDark ? 'bg-[#0B0B0E] border-[#3A3A3C] hover:border-[#8E8E93]/40' : 'bg-[#F3F1EC] border-[#D5D0C8]'} transition-all`}>
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -368,7 +401,7 @@ export default function AnalysisPage() {
           {techList.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[#3A3A3C]/40">
               {techList.map(t => (
-                <span key={t} className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/20">
+                <span key={t} className={`text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#F5A623]/10 border border-[#F5A623]/20 ${isDark ? 'text-[#F5A623]' : 'text-[#D4890A]'}`}>
                   {t}
                 </span>
               ))}
@@ -423,7 +456,7 @@ export default function AnalysisPage() {
                 >
                   <div className={`px-5 pb-5 border-t grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}>
                     {discovery.insights.map((ins, i) => {
-                      const s = INSIGHT_STYLES[ins.type] ?? INSIGHT_STYLES.Insight;
+                      const s = getInsightStyle(ins.type, isDark);
                       return (
                         <div key={i} className={`flex items-start gap-2.5 p-3 rounded-xl border ${s}`}>
                           <span className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded border border-current/30 shrink-0 mt-0.5">
@@ -458,7 +491,7 @@ export default function AnalysisPage() {
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
                   {discovery.stageScores.map(s => {
-                    const c      = scoreColor(s.score);
+                    const c      = scoreColor(s.score, isDark);
                     const active = activeStageFilter === s.stageId;
                     return (
                       <button
@@ -466,13 +499,13 @@ export default function AnalysisPage() {
                         onClick={() => setActiveStageFilter(active ? null : s.stageId)}
                         className={`flex-shrink-0 w-36 p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
                           active
-                            ? 'border-[#F5A623] bg-[#F5A623]/8'
+                            ? isDark ? 'border-[#F5A623] bg-[#F5A623]/8' : 'border-[#D4890A] bg-[#D4890A]/8'
                             : isDark ? 'border-[#3A3A3C] bg-[#1C1C1E] hover:border-[#8E8E93]/40' : 'border-[#D5D0C8] bg-white hover:border-[#3D3D44]'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
                           <span className={`font-serif text-base tabular-nums ${c.text}`}>{maturityScore(s.score).toFixed(1)}</span>
-                          <span className={`text-[9px] font-mono font-bold px-1 py-0.5 rounded border ${priorityBadge(s.priority)}`}>{s.priority}</span>
+                          <span className={`text-[9px] font-mono font-bold px-1 py-0.5 rounded border ${priorityBadge(s.priority, isDark)}`}>{s.priority}</span>
                         </div>
                         <div className={`h-1 rounded-full mb-1.5 overflow-hidden ${isDark ? 'bg-[#3A3A3C]' : 'bg-[#E6E2DB]'}`}>
                           <div className="h-full rounded-full" style={{ width: `${s.score}%`, backgroundColor: c.bar }} />
@@ -497,7 +530,7 @@ export default function AnalysisPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
               {(plan.phases ?? []).map((ph, phIdx) => {
-                const s      = PHASE_STYLES[phIdx] ?? PHASE_STYLES[0];
+                const s      = getPhaseStyle(phIdx, isDark);
                 const agents = getFilteredAgents(ph.agents);
                 return (
                   <div key={ph.number} className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
@@ -513,7 +546,7 @@ export default function AnalysisPage() {
                       <h3 className={`font-serif text-base font-medium ${isDark ? 'text-white' : 'text-[#18181A]'}`}>{ph.name}</h3>
                       <p className={`text-[10px] font-sans mt-0.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{ph.subtitle}</p>
                       <div className="flex items-center justify-between mt-2">
-                        <span className={`text-[11px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{ph.timeframe}</span>
+                        <span className={`text-[11px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#4B5563]'}`}>{ph.timeframe}</span>
                         <span className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${s.badge}`} style={{ border: `1px solid ${s.accent}30` }}>
                           {agents.length} agent{agents.length !== 1 ? 's' : ''}
                         </span>

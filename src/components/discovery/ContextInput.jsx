@@ -71,7 +71,7 @@ function APIForm({ isDark, onSubmit }) {
         >
           {status === 'testing' ? <Loader size={11} className="animate-spin" /> : 'Test connection'}
         </button>
-        {status === 'ok'    && <span className="text-[#30D5C8] text-xs font-mono flex items-center space-x-1"><Check size={11}/><span>{message}</span></span>}
+        {status === 'ok'    && <span className={`text-xs font-mono flex items-center space-x-1 ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}><Check size={11}/><span>{message}</span></span>}
         {status === 'error' && <span className="text-[#F5A623] text-xs font-mono">{message}</span>}
       </div>
       <button
@@ -190,7 +190,7 @@ function BenchmarkForm({ isDark, onSubmit }) {
             onClick={() => { setIndustry(ind); setShowCustom(false); }}
             className={`text-xs py-2 px-3 rounded-lg border text-left transition-all cursor-pointer ${
               industry === ind && !showCustom
-                ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]'
+                ? isDark ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]' : 'border-[#D4890A] bg-[#D4890A]/10 text-[#D4890A]'
                 : isDark ? 'border-[#3A3A3C] text-[#8E8E93] hover:border-[#8E8E93]' : 'border-[#D5D0C8] text-[#3D3D44] hover:border-[#3D3D44]'
             }`}
           >
@@ -201,7 +201,7 @@ function BenchmarkForm({ isDark, onSubmit }) {
           onClick={() => { setShowCustom(true); setIndustry(''); }}
           className={`text-xs py-2 px-3 rounded-lg border text-left transition-all cursor-pointer ${
             showCustom
-              ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]'
+              ? isDark ? 'border-[#F5A623] bg-[#F5A623]/10 text-[#F5A623]' : 'border-[#D4890A] bg-[#D4890A]/10 text-[#D4890A]'
               : isDark ? 'border-[#3A3A3C] border-dashed text-[#8E8E93] hover:border-[#8E8E93]' : 'border-[#D5D0C8] border-dashed text-[#3D3D44] hover:border-[#3D3D44]'
           }`}
         >
@@ -252,7 +252,7 @@ export default function ContextInput({ isDark, onConfirm }) {
   if (confirmed) {
     return (
       <div className={`rounded-2xl border p-4 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
-        <p className="text-[#30D5C8] font-mono text-xs uppercase tracking-wider">Context received — starting analysis</p>
+        <p className={`font-mono text-xs uppercase tracking-wider ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>Context received — starting analysis</p>
       </div>
     );
   }

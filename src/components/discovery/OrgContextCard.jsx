@@ -22,10 +22,10 @@ export default function OrgContextCard({ isDark, onConfirm }) {
         isDark ? "bg-[#1C1C1E] border-[#3A3A3C]" : "bg-white border-[#D5D0C8]"
       }`}>
         <div>
-          <p className="text-[10px] font-mono uppercase tracking-wider text-[#30D5C8] mb-0.5">Organisation confirmed</p>
+          <p className={`text-[10px] font-mono uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>Organisation confirmed</p>
           <p className={`text-sm font-sans ${isDark ? "text-[#F1F1F3]" : "text-[#18181A]"}`}>{orgName}</p>
         </div>
-        <Check size={15} className="text-[#30D5C8] shrink-0" />
+        <Check size={15} className={`shrink-0 ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`} />
       </div>
     );
   }

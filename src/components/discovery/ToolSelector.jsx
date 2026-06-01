@@ -82,7 +82,7 @@ export default function ToolSelector({ isDark, onConfirm, inferredStack }) {
   if (confirmed) {
     return (
       <div className={`rounded-2xl border p-4 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
-        <p className="text-[#30D5C8] font-mono text-xs uppercase tracking-wider mb-1">Tools confirmed</p>
+        <p className={`font-mono text-xs uppercase tracking-wider mb-1 ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>Tools confirmed</p>
         <p className={`font-sans text-xs ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
           {getSelectionSummary() || 'No tools selected'}
         </p>

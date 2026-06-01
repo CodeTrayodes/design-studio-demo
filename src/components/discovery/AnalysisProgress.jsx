@@ -72,8 +72,9 @@ export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
         return;
       }
 
+      const stageIdx = idx;
       stageTimer = setTimeout(() => {
-        setCompleted(p => [...p, idx]);
+        setCompleted(p => [...p, stageIdx]);
         idx++;
         advance();
       }, STAGES[idx].duration);
@@ -133,13 +134,13 @@ export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
 
               <span className={`text-xs font-sans flex-1 transition-colors ${
                 isDone   ? isDark ? 'text-[#30D5C8]' : 'text-[#1AB5A8]'
-                : isActive && !isPaused ? 'text-[#F5A623]'
-                : isPaused ? isDark ? 'text-[#F5A623]/50' : 'text-[#F5A623]/70'
-                : isDark  ? 'text-[#8E8E93]/50' : 'text-[#3D3D44]/40'
+                : isActive && !isPaused ? isDark ? 'text-[#F5A623]' : 'text-[#D4890A]'
+                : isPaused ? isDark ? 'text-[#F5A623]/50' : 'text-[#D4890A]/85'
+                : isDark  ? 'text-[#8E8E93]/50' : 'text-[#3D3D44]/65'
               }`}>
                 {stage.label}
                 {isPaused && (
-                  <span className={`font-mono text-[10px] ml-2 ${isDark ? 'text-[#8E8E93]/50' : 'text-[#3D3D44]/50'}`}>
+                  <span className={`font-mono text-[10px] ml-2 ${isDark ? 'text-[#8E8E93]/50' : 'text-[#3D3D44]/70'}`}>
                     — awaiting results...
                   </span>
                 )}

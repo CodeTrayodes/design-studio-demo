@@ -29,6 +29,15 @@ const PHASE_CFG = {
   3: { color: '#A78BFA', label: 'Phase 3 — Advanced Autonomy',   tint: 'rgba(167,139,250,0.04)' },
 };
 
+function getContrastColor(color, isDark) {
+  if (isDark) return color;
+  if (color === '#30D5C8') return '#0D9488'; // Darker teal
+  if (color === '#F5A623') return '#D4890A'; // Darker orange/amber
+  if (color === '#A78BFA') return '#6D28D9'; // Darker purple/violet
+  if (color === '#EF4444') return '#DC2626'; // Darker red
+  return color;
+}
+
 function stageColor(score) {
   if (score >= 70) return '#30D5C8';
   if (score >= 40) return '#F5A623';
@@ -47,10 +56,10 @@ function impactColor(i) {
   return '#F5A623';
 }
 
-function priorityBadgeInlineStyle(p) {
-  if (p === 'HIGH') return { background: 'rgba(239,68,68,0.12)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)' };
-  if (p === 'LOW')  return { background: 'rgba(48,213,200,0.12)', color: '#30D5C8', border: '1px solid rgba(48,213,200,0.3)' };
-  return { background: 'rgba(245,166,35,0.12)', color: '#F5A623', border: '1px solid rgba(245,166,35,0.3)' };
+function priorityBadgeInlineStyle(p, isDark) {
+  if (p === 'HIGH') return { background: isDark ? 'rgba(239,68,68,0.12)' : 'rgba(239,68,68,0.06)', color: isDark ? '#EF4444' : '#DC2626', border: `1px solid ${isDark ? 'rgba(239,68,68,0.3)' : 'rgba(239,68,68,0.2)'}` };
+  if (p === 'LOW')  return { background: isDark ? 'rgba(48,213,200,0.12)' : 'rgba(13,148,136,0.06)', color: isDark ? '#30D5C8' : '#0D9488', border: `1px solid ${isDark ? 'rgba(48,213,200,0.3)' : 'rgba(13,148,136,0.2)'}` };
+  return { background: isDark ? 'rgba(245,166,35,0.12)' : 'rgba(212,137,10,0.06)', color: isDark ? '#F5A623' : '#D4890A', border: `1px solid ${isDark ? 'rgba(245,166,35,0.3)' : 'rgba(212,137,10,0.2)'}` };
 }
 
 // ─── Node Types (defined OUTSIDE component to avoid ReactFlow recreation) ────
@@ -87,13 +96,13 @@ function StageNode({ data, selected }) {
         <span style={{ fontSize: 11, fontWeight: 600, color: isDark ? '#F1F1F3' : '#18181A', lineHeight: 1.3, flex: 1, fontFamily: 'Inter, sans-serif' }}>
           {data.stageName}
         </span>
-        <span style={{ fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 4, flexShrink: 0, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.05em', ...priorityBadgeInlineStyle(data.priority) }}>
+        <span style={{ fontSize: 8, fontWeight: 700, padding: '2px 5px', borderRadius: 4, flexShrink: 0, fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.05em', ...priorityBadgeInlineStyle(data.priority, isDark) }}>
           {data.priority}
         </span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, marginBottom: 7 }}>
-        <span style={{ fontSize: 22, fontFamily: '"Cormorant Garamond", Georgia, serif', color: c, fontWeight: 500, lineHeight: 1 }}>
+        <span style={{ fontSize: 22, fontFamily: '"Cormorant Garamond", Georgia, serif', color: getContrastColor(c, isDark), fontWeight: 500, lineHeight: 1 }}>
           {mat}
         </span>
         <span style={{ fontSize: 10, color: isDark ? '#8E8E93' : '#3D3D44', fontFamily: 'JetBrains Mono, monospace' }}>/5.0</span>
@@ -141,14 +150,14 @@ function AgentNode({ data, selected }) {
           </span>
         )}
         {data.category && (
-          <span style={{ fontSize: 9, background: `${pc}18`, color: pc, padding: '2px 6px', borderRadius: 20, fontFamily: 'JetBrains Mono, monospace', border: `1px solid ${pc}30` }}>
+          <span style={{ fontSize: 9, background: `${pc}18`, color: getContrastColor(pc, isDark), padding: '2px 6px', borderRadius: 20, fontFamily: 'JetBrains Mono, monospace', border: `1px solid ${pc}30` }}>
             {data.category}
           </span>
         )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-        <span style={{ fontSize: 9, fontWeight: 700, color: ic, fontFamily: 'JetBrains Mono, monospace' }}>{data.impact}</span>
+        <span style={{ fontSize: 9, fontWeight: 700, color: getContrastColor(ic, isDark), fontFamily: 'JetBrains Mono, monospace' }}>{data.impact}</span>
         <span style={{ fontSize: 9, color: isDark ? '#3A3A3C' : '#D5D0C8' }}>·</span>
         <span style={{ fontSize: 9, color: isDark ? '#8E8E93' : '#3D3D44', fontFamily: 'JetBrains Mono, monospace' }}>
           {(data.effort ?? '').split(' ').slice(0, 2).join(' ')}
@@ -186,7 +195,7 @@ function SwimlaneNode({ data }) {
           fontSize: 9,
           fontFamily: 'JetBrains Mono, monospace',
           fontWeight: 700,
-          color: `${pc}65`,
+          color: isDark ? `${pc}65` : `${getContrastColor(pc, isDark)}a0`,
           letterSpacing: '0.15em',
           textTransform: 'uppercase',
           whiteSpace: 'nowrap',
@@ -332,7 +341,7 @@ function InlineRow({ label, value, isDark, color }) {
   if (!value) return null;
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-      <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#6B6B73', flexShrink: 0 }}>
+      <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#4B5563', flexShrink: 0 }}>
         {label}
       </span>
       <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', fontWeight: 600, color: color ?? (isDark ? '#F1F1F3' : '#18181A'), textAlign: 'right' }}>
@@ -350,6 +359,7 @@ function DetailPanel({ node, isDark, onClose }) {
 
   const d      = node.data;
   const accent = isAgent ? (PHASE_COLORS[d.phaseNumber] ?? '#F5A623') : stageColor(d.score ?? 50);
+  const displayAccent = getContrastColor(accent, isDark);
 
   return (
     <motion.div
@@ -378,7 +388,7 @@ function DetailPanel({ node, isDark, onClose }) {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
           <div style={{ flex: 1, marginRight: 8 }}>
-            <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, marginBottom: 3 }}>
+            <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: displayAccent, marginBottom: 3 }}>
               {isStage ? 'Process Stage' : `Phase ${d.phaseNumber} Agent`}
             </span>
             <span style={{ display: 'block', fontSize: 15, fontFamily: '"Cormorant Garamond", serif', fontWeight: 600, color: isDark ? '#F1F1F3' : '#18181A', lineHeight: 1.3 }}>
@@ -398,23 +408,23 @@ function DetailPanel({ node, isDark, onClose }) {
         {isStage && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 2 }}>
-              <span style={{ fontSize: 28, fontFamily: '"Cormorant Garamond", serif', fontWeight: 500, color: accent, lineHeight: 1 }}>
+              <span style={{ fontSize: 28, fontFamily: '"Cormorant Garamond", serif', fontWeight: 500, color: displayAccent, lineHeight: 1 }}>
                 {((d.score ?? 50) / 100 * 5).toFixed(1)}
               </span>
-              <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: isDark ? '#8E8E93' : '#6B6B73' }}>/5.0 maturity</span>
+              <span style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: isDark ? '#8E8E93' : '#4B5563' }}>/5.0 maturity</span>
             </div>
             <div style={{ height: 4, background: isDark ? '#3A3A3C' : '#E6E2DB', borderRadius: 2, overflow: 'hidden', marginBottom: 2 }}>
               <div style={{ width: `${d.score ?? 50}%`, height: '100%', background: accent, borderRadius: 2 }} />
             </div>
-            <InlineRow label="Coverage" value={`${d.score ?? 50}%`} isDark={isDark} color={accent} />
-            <InlineRow label="Priority" value={d.priority} isDark={isDark} color={priorityColor(d.priority)} />
+            <InlineRow label="Coverage" value={`${d.score ?? 50}%`} isDark={isDark} color={displayAccent} />
+            <InlineRow label="Priority" value={d.priority} isDark={isDark} color={getContrastColor(priorityColor(d.priority), isDark)} />
             <InlineRow label="Phase Assigned" value={d.phase} isDark={isDark} />
             {d.gap && (
               <div>
-                <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#6B6B73', marginBottom: 5 }}>
+                <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#4B5563', marginBottom: 5 }}>
                   Gap / Recommendation
                 </span>
-                <p style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', lineHeight: 1.65, color: isDark ? '#8E8E93' : '#3D3D44', margin: 0 }}>
+                <p style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', lineHeight: 1.65, color: isDark ? '#8E8E93' : '#27272A', margin: 0 }}>
                   {d.gap}
                 </p>
               </div>
@@ -425,17 +435,17 @@ function DetailPanel({ node, isDark, onClose }) {
         {isAgent && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <InlineRow label="Platform"  value={d.platform}  isDark={isDark} />
-            <InlineRow label="Category"  value={d.category}  isDark={isDark} color={accent} />
-            <InlineRow label="Phase"     value={`Phase ${d.phaseNumber} — ${PHASE_NAMES[d.phaseNumber] ?? ''}`} isDark={isDark} color={accent} />
+            <InlineRow label="Category"  value={d.category}  isDark={isDark} color={displayAccent} />
+            <InlineRow label="Phase"     value={`Phase ${d.phaseNumber} — ${PHASE_NAMES[d.phaseNumber] ?? ''}`} isDark={isDark} color={displayAccent} />
             <InlineRow label="Stage"     value={d.stageName} isDark={isDark} />
-            <InlineRow label="Impact"    value={d.impact}    isDark={isDark} color={impactColor(d.impact)} />
+            <InlineRow label="Impact"    value={d.impact}    isDark={isDark} color={getContrastColor(impactColor(d.impact), isDark)} />
             <InlineRow label="Effort"    value={d.effort}    isDark={isDark} />
             {d.rationale && (
               <div>
-                <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#6B6B73', marginBottom: 5 }}>
+                <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#4B5563', marginBottom: 5 }}>
                   Rationale
                 </span>
-                <p style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', lineHeight: 1.65, color: isDark ? '#8E8E93' : '#3D3D44', margin: 0 }}>
+                <p style={{ fontSize: 12, fontFamily: 'Inter, sans-serif', lineHeight: 1.65, color: isDark ? '#8E8E93' : '#27272A', margin: 0 }}>
                   {d.rationale}
                 </p>
               </div>
@@ -578,7 +588,7 @@ export default function RoadmapPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
           <a
             href="/plan"
-            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#6B6B73', textDecoration: 'none', flexShrink: 0 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.08em', color: isDark ? '#8E8E93' : '#4B5563', textDecoration: 'none', flexShrink: 0 }}
           >
             <ArrowLeft size={11} /> Plan
           </a>
@@ -601,8 +611,8 @@ export default function RoadmapPage() {
             { label: 'Agents',   value: totalAgents, color: '#30D5C8' },
           ].map(s => (
             <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 15, fontFamily: '"Cormorant Garamond", serif', fontWeight: 600, color: s.color, lineHeight: 1 }}>{s.value}</div>
-              <div style={{ fontSize: 8, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: isDark ? '#8E8E93' : '#6B6B73', marginTop: 1 }}>{s.label}</div>
+              <div style={{ fontSize: 15, fontFamily: '"Cormorant Garamond", serif', fontWeight: 600, color: getContrastColor(s.color, isDark), lineHeight: 1 }}>{s.value}</div>
+              <div style={{ fontSize: 8, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.06em', color: isDark ? '#8E8E93' : '#4B5563', marginTop: 1 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -685,7 +695,7 @@ export default function RoadmapPage() {
               {[1, 2, 3].map(ph => (
                 <div key={ph} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 8, height: 8, borderRadius: 2, background: PHASE_COLORS[ph], flexShrink: 0 }} />
-                  <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: PHASE_COLORS[ph], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: getContrastColor(PHASE_COLORS[ph], isDark), textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     Ph{ph} · {PHASE_NAMES[ph]}
                   </span>
                 </div>
@@ -698,7 +708,7 @@ export default function RoadmapPage() {
               ].map(l => (
                 <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <div style={{ width: 8, height: 3, borderRadius: 1, background: l.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: isDark ? '#8E8E93' : '#6B6B73' }}>{l.label}</span>
+                  <span style={{ fontSize: 9, fontFamily: 'JetBrains Mono, monospace', color: isDark ? '#8E8E93' : '#4B5563' }}>{l.label}</span>
                 </div>
               ))}
             </div>
