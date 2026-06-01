@@ -1,17 +1,47 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, Link2, FileText, BarChart3, Check, Loader } from 'lucide-react';
+import { UploadCloud, Link2, ClipboardList, Star, Check, Loader, CheckCircle2, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const METHODS = [
-  { id: 'api',           icon: Link2,     label: 'API Integration',          desc: 'Connect your tool endpoint + token for live telemetry' },
-  { id: 'document',      icon: Upload,    label: 'Document Upload',          desc: 'Upload process maps, SOPs, or export files' },
-  { id: 'questionnaire', icon: FileText,  label: 'Structured Questionnaire', desc: 'Answer targeted questions about your process' },
-  { id: 'benchmark',     icon: BarChart3, label: 'Industry Benchmark',       desc: 'Use pre-built benchmarks for your industry & process' },
+  {
+    id: 'upload',
+    icon: UploadCloud,
+    label: 'Upload Documents',
+    desc: 'Process documentation, SOPs, flow diagrams (PDF, Word, Excel)',
+    improvement: 20,
+    badge: null,
+  },
+  {
+    id: 'api',
+    icon: Link2,
+    label: 'Connect System',
+    desc: 'Link your business system via API for real-time process data',
+    improvement: 35,
+    badge: { text: 'Most Accurate', color: 'text-[#30D5C8] bg-[#30D5C8]/10 border-[#30D5C8]/30' },
+  },
+  {
+    id: 'questionnaire',
+    icon: ClipboardList,
+    label: 'Questionnaire',
+    desc: 'Answer guided questions about your current process steps',
+    improvement: 25,
+    badge: { text: 'Recommended', color: 'text-amber-400 bg-amber-400/10 border-amber-400/30' },
+  },
+  {
+    id: 'benchmark',
+    icon: Star,
+    label: 'Industry Templates',
+    desc: 'Start from industry best practice templates from our database',
+    improvement: 15,
+    badge: null,
+  },
 ];
 
-/* ── Form sub-components ─────────────────────────────────────────────────── */
+const IMPROVEMENT_MAP = { api: 35, upload: 20, questionnaire: 25, benchmark: 15 };
+
+/* -- Form sub-components --------------------------------------------------- */
 
 function APIForm({ isDark, onSubmit }) {
   const [endpoint, setEndpoint] = useState('');
@@ -109,7 +139,7 @@ function DocumentForm({ isDark, onSubmit }) {
         <Upload size={22} className={`mx-auto mb-2 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`} />
         {file
           ? <p className={`text-xs font-mono ${isDark ? 'text-[#30D5C8]' : 'text-[#1AB5A8]'}`}>{file.name}</p>
-          : <p className={`text-xs ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>Drop a PDF, CSV, or XLSX — or click to browse</p>
+          : <p className={`text-xs ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>Drop a PDF, CSV, or XLSX -- or click to browse</p>
         }
         <input id="ctx-file-input" type="file" className="hidden" accept=".pdf,.csv,.xlsx,.docx"
           onChange={e => setFile(e.target.files?.[0] || null)} />
@@ -132,11 +162,11 @@ function DocumentForm({ isDark, onSubmit }) {
 function QuestionnaireForm({ isDark, onSubmit }) {
   const [answers, setAnswers] = useState({});
   const questions = [
-    { id: 'team_size',  label: 'How many people are involved in this process?' },
-    { id: 'cycle_time', label: 'What is the typical end-to-end cycle time?'    },
-    { id: 'pain_point', label: 'What is the biggest pain point today?'         },
-    { id: 'automation', label: 'What percentage is currently automated?'       },
-    { id: 'volume',     label: 'How many transactions per week?'               },
+    { id: 'team_size',          label: 'How many people are involved in this process?' },
+    { id: 'cycle_time',         label: 'What is the typical end-to-end cycle time?' },
+    { id: 'improvement_opps',  label: 'What are the biggest improvement opportunities today?' },
+    { id: 'automation',         label: 'What percentage is currently automated?' },
+    { id: 'volume',             label: 'How many transactions per week?' },
   ];
   const complete = questions.every(q => answers[q.id]?.trim());
 
@@ -171,9 +201,9 @@ function QuestionnaireForm({ isDark, onSubmit }) {
 
 function BenchmarkForm({ isDark, onSubmit }) {
   const INDUSTRIES = ['Technology', 'Financial Services', 'Healthcare', 'Manufacturing', 'Retail', 'Professional Services', 'Energy & Utilities', 'Logistics'];
-  const [industry, setIndustry] = useState('');
-  const [custom,   setCustom]   = useState('');
-  const [showCustom, setShowCustom] = useState(false);
+  const [industry,    setIndustry]    = useState('');
+  const [custom,      setCustom]      = useState('');
+  const [showCustom,  setShowCustom]  = useState(false);
 
   const finalIndustry = showCustom ? custom.trim() : industry;
   const ready = finalIndustry.length > 1;
@@ -181,7 +211,7 @@ function BenchmarkForm({ isDark, onSubmit }) {
   return (
     <div className="space-y-3">
       <p className={`text-xs ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-        We will apply industry-standard benchmarks for your sector. Select your industry for the most accurate baseline.
+        We will apply industry-standard templates for your sector. Select your industry for the most accurate baseline.
       </p>
       <div className="grid grid-cols-2 gap-2">
         {INDUSTRIES.map(ind => (
@@ -232,27 +262,55 @@ function BenchmarkForm({ isDark, onSubmit }) {
             : isDark ? 'bg-[#3A3A3C] text-[#8E8E93] cursor-not-allowed' : 'bg-[#E6E2DB] text-[#3D3D44] cursor-not-allowed'
         }`}
       >
-        Use benchmark data
+        Use template data
       </button>
     </div>
   );
 }
 
-/* ── Main export ─────────────────────────────────────────────────────────── */
+/* -- Main export ------------------------------------------------------------ */
 
 export default function ContextInput({ isDark, onConfirm }) {
-  const [selected,  setSelected]  = useState(null);
-  const [confirmed, setConfirmed] = useState(false);
+  const [selectedMethods, setSelectedMethods] = useState(new Set());
+  const [confirmed,       setConfirmed]       = useState(false);
+  // After clicking Continue, show the first selected method's detailed form
+  const [activeFormMethod, setActiveFormMethod] = useState(null);
 
-  function handleConfirm(data) {
+  function toggleMethod(id) {
+    setSelectedMethods(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  const selectedCount = selectedMethods.size;
+  const totalImprovement = Array.from(selectedMethods).reduce(
+    (sum, id) => sum + (IMPROVEMENT_MAP[id] ?? 0),
+    0
+  );
+
+  function handleContinue() {
+    const methods = Array.from(selectedMethods);
+    // Show the first method's detailed form
+    setActiveFormMethod(methods[0]);
+  }
+
+  function handleFormSubmit(data) {
     setConfirmed(true);
-    onConfirm(selected, data);
+    onConfirm({ methods: Array.from(selectedMethods), data });
   }
 
   if (confirmed) {
     return (
       <div className={`rounded-2xl border p-4 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
-        <p className={`font-mono text-xs uppercase tracking-wider ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>Context received — starting analysis</p>
+        <p className={`font-mono text-xs uppercase tracking-wider ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>
+          Context received -- starting analysis
+        </p>
       </div>
     );
   }
@@ -260,48 +318,133 @@ export default function ContextInput({ isDark, onConfirm }) {
   return (
     <div className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
       <div className="p-4 pb-3">
-        <p className={`text-[10px] font-mono uppercase tracking-wider mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-          Select input method
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-          {METHODS.map(m => {
-            const Icon   = m.icon;
-            const active = selected === m.id;
-            return (
-              <motion.button
-                key={m.id}
-                onClick={() => setSelected(m.id)}
-                whileHover={{ scale: 1.01 }}
-                className={`flex items-start space-x-3 p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  active
-                    ? 'border-[#F5A623] bg-[#F5A623]/8'
-                    : isDark ? 'border-[#3A3A3C] hover:border-[#8E8E93]' : 'border-[#D5D0C8] hover:border-[#3D3D44]'
-                }`}
-              >
-                <Icon size={16} className={active ? 'text-[#F5A623]' : isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'} />
-                <div>
-                  <p className={`text-xs font-semibold ${active ? 'text-[#F5A623]' : isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
-                    {m.label}
-                  </p>
-                  <p className={`text-[10px] mt-0.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{m.desc}</p>
-                </div>
-              </motion.button>
-            );
-          })}
-        </div>
 
-        {selected && (
+        {/* Title */}
+        <p className={`text-sm font-semibold mb-1 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
+          How would you like to define your process?
+        </p>
+        <p className={`text-[10px] font-mono uppercase tracking-wider mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+          Select one or more input sources
+        </p>
+
+        {/* 2x2 card grid */}
+        {!activeFormMethod && (
+          <>
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              {METHODS.map(m => {
+                const Icon     = m.icon;
+                const isActive = selectedMethods.has(m.id);
+                return (
+                  <motion.div
+                    key={m.id}
+                    onClick={() => toggleMethod(m.id)}
+                    whileHover={{ scale: 1.01 }}
+                    className={`relative rounded-xl p-4 cursor-pointer transition-all ${
+                      isActive
+                        ? 'bg-[#F5A623]/5 border border-[#F5A623]'
+                        : isDark
+                          ? 'bg-[#1C1C1E] border border-[#3A3A3C] hover:border-[#F5A623]/50'
+                          : 'bg-white border border-[#D5D0C8] hover:border-[#F5A623]/50'
+                    }`}
+                  >
+                    {/* Checkmark top-right when selected */}
+                    {isActive && (
+                      <CheckCircle2
+                        size={15}
+                        className="absolute top-2 right-2 text-[#F5A623]"
+                      />
+                    )}
+
+                    {/* Badge top-left (when not selected, so it doesn't clash with checkmark) */}
+                    {m.badge && !isActive && (
+                      <span className={`absolute top-2 right-2 text-[9px] font-mono px-1.5 py-0.5 rounded border ${m.badge.color}`}>
+                        {m.badge.text}
+                      </span>
+                    )}
+                    {m.badge && isActive && (
+                      <span className={`absolute top-2 left-2 text-[9px] font-mono px-1.5 py-0.5 rounded border ${m.badge.color}`}>
+                        {m.badge.text}
+                      </span>
+                    )}
+
+                    {/* Icon */}
+                    <Icon
+                      size={20}
+                      className={`mb-2 ${isActive ? 'text-[#F5A623]' : 'text-[#8E8E93]'}`}
+                    />
+
+                    {/* Title */}
+                    <p className={`text-xs font-semibold leading-tight mb-1 ${isActive ? 'text-[#F5A623]' : isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
+                      {m.label}
+                    </p>
+
+                    {/* Description */}
+                    <p className={`text-[10px] leading-snug mb-2 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+                      {m.desc}
+                    </p>
+
+                    {/* Improvement badge */}
+                    <span className="text-[#30D5C8] text-[10px] font-mono">
+                      +{m.improvement}% process understanding
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Total improvement strip */}
+            {selectedCount >= 1 && (
+              <motion.div
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-[#30D5C8]/10 border border-[#30D5C8]/30 rounded-lg p-2 text-[#30D5C8] text-sm text-center mb-3"
+              >
+                Based on {selectedCount} source{selectedCount > 1 ? 's' : ''} selected: +{totalImprovement}% better process understanding
+              </motion.div>
+            )}
+
+            {/* Continue button */}
+            <button
+              onClick={handleContinue}
+              disabled={selectedCount === 0}
+              className={`w-full py-2 rounded-xl text-xs font-semibold transition-all ${
+                selectedCount > 0
+                  ? 'bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black cursor-pointer hover:scale-[1.01]'
+                  : isDark
+                    ? 'bg-[#3A3A3C] text-[#8E8E93] cursor-not-allowed'
+                    : 'bg-[#E6E2DB] text-[#3D3D44] cursor-not-allowed'
+              }`}
+            >
+              Continue with {selectedCount > 0 ? selectedCount : ''} Source{selectedCount !== 1 ? 's' : ''}
+            </button>
+          </>
+        )}
+
+        {/* Detailed sub-form for the first selected method */}
+        {activeFormMethod && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             className={`border-t pt-4 ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}
           >
-            {selected === 'api'           && <APIForm           isDark={isDark} onSubmit={handleConfirm} />}
-            {selected === 'document'      && <DocumentForm      isDark={isDark} onSubmit={handleConfirm} />}
-            {selected === 'questionnaire' && <QuestionnaireForm isDark={isDark} onSubmit={handleConfirm} />}
-            {selected === 'benchmark'     && <BenchmarkForm     isDark={isDark} onSubmit={handleConfirm} />}
+            <div className="flex items-center justify-between mb-3">
+              <p className={`text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+                {METHODS.find(m => m.id === activeFormMethod)?.label}
+              </p>
+              <button
+                onClick={() => setActiveFormMethod(null)}
+                className={`text-[10px] font-mono underline cursor-pointer ${isDark ? 'text-[#8E8E93] hover:text-[#F1F1F3]' : 'text-[#3D3D44] hover:text-[#18181A]'}`}
+              >
+                Back
+              </button>
+            </div>
+            {activeFormMethod === 'api'           && <APIForm           isDark={isDark} onSubmit={handleFormSubmit} />}
+            {activeFormMethod === 'upload'        && <DocumentForm      isDark={isDark} onSubmit={handleFormSubmit} />}
+            {activeFormMethod === 'questionnaire' && <QuestionnaireForm isDark={isDark} onSubmit={handleFormSubmit} />}
+            {activeFormMethod === 'benchmark'     && <BenchmarkForm     isDark={isDark} onSubmit={handleFormSubmit} />}
           </motion.div>
         )}
+
       </div>
     </div>
   );

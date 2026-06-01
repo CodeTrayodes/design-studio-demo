@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { requestLlm } from '@/lib/llm';
 
-// ── Scoring constants (mirrors real app) ──────────────────────────────────────
+// Scoring constants (mirrors real app)
 
 const RATING_SCORE = { NOT_IN_PLACE: 0, MANUAL: 25, PARTIAL: 60, AUTOMATED: 100 };
 
-// Dimension weights (pain 30%, data 25%, processDefinition 20%, integration 15%, adoption 10%)
+// Dimension weights (improvement opportunities 30%, data 25%, processDefinition 20%, integration 15%, adoption 10%)
 const DIM_WEIGHTS = { pain: 0.30, data: 0.25, processDefinition: 0.20, integration: 0.15, adoption: 0.10 };
 
-// ── Tech stack → dimension boosts ─────────────────────────────────────────────
+// Tech stack -> dimension boosts
 
 const TECH_BOOSTS = {
   // CRM
@@ -77,7 +77,7 @@ function inferBaseDimensions(techList) {
   return dims;
 }
 
-// ── Stage name heuristics (mirrors real app's inferStageScores) ───────────────
+// Stage name heuristics (mirrors real app's inferStageScores)
 
 function inferStageDimensions(stageName, baseDims) {
   const n = stageName.toLowerCase();
@@ -148,7 +148,7 @@ function compositeToPhase(c) {
   return 'Backlog';
 }
 
-// ── Activity fallback rating (mirrors real app) ───────────────────────────────
+// Activity fallback rating (mirrors real app)
 
 function activityFallbackRating(activityType, dims) {
   const { pain, data, processDefinition, integration, adoption } = dims;
@@ -187,7 +187,7 @@ function activityFallbackRating(activityType, dims) {
   return 'NOT_IN_PLACE';
 }
 
-// ── Deterministic score computation ──────────────────────────────────────────
+// Deterministic score computation
 
 function computeStageScore(activities, stageDims) {
   if (!activities || activities.length === 0) return 0;
@@ -200,7 +200,7 @@ function computeStageScore(activities, stageDims) {
   return Math.round(scored.reduce((s, v) => s + v, 0) / scored.length);
 }
 
-// ── Route ─────────────────────────────────────────────────────────────────────
+// Route
 
 export async function POST(req) {
   try {
@@ -223,13 +223,13 @@ export async function POST(req) {
 
     const result = await requestLlm({
       systemPrompt:
-        'You are a senior enterprise automation consultant performing a rigorous process assessment. Apply the scoring methodology exactly as specified. Return only valid JSON — no markdown, no explanation.',
+        'You are a senior enterprise automation consultant performing a rigorous process discovery. Apply the scoring methodology exactly as specified. Return only valid JSON -- no markdown, no explanation.',
 
       userPrompt: `Assess automation coverage for **${processName}** on tech stack: ${techDisplay}.${contextSection}
 
 ## MANDATORY SCORING METHODOLOGY
 
-**Rating scale** — use ONLY these four values:
+**Rating scale** -- use ONLY these four values:
 - NOT_IN_PLACE = 0   (no automation, activity is broken or absent)
 - MANUAL = 25        (entirely human effort, no system support)
 - PARTIAL = 60       (some tool support but significant manual steps remain)
@@ -238,28 +238,28 @@ export async function POST(req) {
 **Stage coverage %** = arithmetic mean of all activity scores using 0/25/60/100
 
 **Activity rating rules by type:**
-- INTEGRATION (APIs, syncs, data handoffs): integration≥4.5 AND data≥4.0→AUTOMATED; integration≥3.0 OR data≥3.0→PARTIAL; integration<2.0→NOT_IN_PLACE; else MANUAL
-- ANALYTICS (reporting, forecasting, dashboards): data≥4.5→AUTOMATED; data≥2.8→PARTIAL; data<1.8→NOT_IN_PLACE; else MANUAL
-- APPROVAL (sign-offs, workflow gates, notifications): processDefinition≥4.0 AND adoption≥3.0→AUTOMATED; processDefinition≥2.8→PARTIAL; else MANUAL
-- HUMAN (negotiations, relationships, judgment calls): adoption≥4.0 AND processDefinition≥4.0→PARTIAL; else MANUAL
-- SYSTEM (data entry, capture, enrichment, updates): data≥4.0 AND integration≥3.5→AUTOMATED; data≥2.8 OR integration≥2.8→PARTIAL; else MANUAL
+- INTEGRATION (APIs, syncs, data handoffs): integration>=4.5 AND data>=4.0->AUTOMATED; integration>=3.0 OR data>=3.0->PARTIAL; integration<2.0->NOT_IN_PLACE; else MANUAL
+- ANALYTICS (reporting, forecasting, dashboards): data>=4.5->AUTOMATED; data>=2.8->PARTIAL; data<1.8->NOT_IN_PLACE; else MANUAL
+- APPROVAL (sign-offs, workflow gates, notifications): processDefinition>=4.0 AND adoption>=3.0->AUTOMATED; processDefinition>=2.8->PARTIAL; else MANUAL
+- HUMAN (negotiations, relationships, judgment calls): adoption>=4.0 AND processDefinition>=4.0->PARTIAL; else MANUAL
+- SYSTEM (data entry, capture, enrichment, updates): data>=4.0 AND integration>=3.5->AUTOMATED; data>=2.8 OR integration>=2.8->PARTIAL; else MANUAL
 
 **Global rules:**
-- If pain≥4.0 AND any other score<2.5 → downgrade lowest-rated activities to NOT_IN_PLACE
-- **VARIATION IS MANDATORY**: never assign identical ratings to all activities in a stage — ensure ≥20% spread
+- If pain>=4.0 AND any other score<2.5 -> downgrade lowest-rated activities to NOT_IN_PLACE
+- **VARIATION IS MANDATORY**: never assign identical ratings to all activities in a process step -- ensure >=20% spread
 
-## PRE-COMPUTED DIMENSION SCORES (apply these — do not invent your own)
+## PRE-COMPUTED DIMENSION SCORES (apply these -- do not invent your own)
 ${stageData.map(s =>
-  `**${s.name}** [${s.id}]: pain=${s.dims.pain.toFixed(1)}, data=${s.dims.data.toFixed(1)}, processDef=${s.dims.processDefinition.toFixed(1)}, integration=${s.dims.integration.toFixed(1)}, adoption=${s.dims.adoption.toFixed(1)} → composite=${s.composite.toFixed(2)} → ${s.phase}`
+  `**${s.name}** [${s.id}]: pain=${s.dims.pain.toFixed(1)}, data=${s.dims.data.toFixed(1)}, processDef=${s.dims.processDefinition.toFixed(1)}, integration=${s.dims.integration.toFixed(1)}, adoption=${s.dims.adoption.toFixed(1)} -> composite=${s.composite.toFixed(2)} -> ${s.phase}`
 ).join('\n')}
 
 ## TASK
-For each stage, identify 4–6 realistic activities that occur in **${processName}**. Apply the rules above using the pre-computed dimension scores to rate each activity. Compute coverage as the mean.
+For each process step, identify 4-6 realistic activities that occur in **${processName}**. Apply the rules above using the pre-computed dimension scores to rate each activity. Compute coverage as the mean.
 
 Return JSON (no markdown):
 {
   "overallScore": <mean of all stage scores, integer>,
-  "executiveSummary": "<3–4 sentences: current automation maturity, the single biggest gap, top opportunity with quantified business impact, and recommended first action>",
+  "executiveSummary": "<3-4 sentences: current automation maturity, the single biggest optimization gap, top opportunity with quantified business impact, and recommended first action>",
   "stageScores": [
     {
       "stageId": "<id from list>",
@@ -270,24 +270,24 @@ Return JSON (no markdown):
       "activities": [
         { "name": "<activity>", "type": "<INTEGRATION|ANALYTICS|APPROVAL|HUMAN|SYSTEM>", "rating": "<rating>", "score": <0|25|60|100> }
       ],
-      "manualTasks": ["<top 2–3 manual/broken tasks>"],
-      "automatedItems": ["<1–3 already automated items, or empty array if none>"],
-      "gap": "<one sentence: the single most impactful automation gap in this stage>",
+      "manualTasks": ["<top 2-3 manual/broken tasks>"],
+      "automatedItems": ["<1-3 already automated items, or empty array if none>"],
+      "gap": "<one sentence: the single most impactful optimization gap in this process step>",
       "dimensionScores": { "pain": <float>, "data": <float>, "processDefinition": <float>, "integration": <float>, "adoption": <float> }
     }
   ],
   "insights": [
-    { "type": "Opportunity", "text": "<specific, quantified opportunity tied to a named stage>" },
-    { "type": "Risk",        "text": "<specific business risk if top gap is not addressed>" },
+    { "type": "Opportunity", "text": "<specific, quantified optimization target tied to a named process step>" },
+    { "type": "Risk",        "text": "<specific business risk if top optimization gap is not addressed>" },
     { "type": "Action",      "text": "<immediate recommended action with expected outcome>" },
-    { "type": "Opportunity", "text": "<second opportunity in a different stage>" },
+    { "type": "Opportunity", "text": "<second improvement opportunity in a different process step>" },
     { "type": "Watch",       "text": "<metric or trend to monitor post-implementation>" }
   ]
 }`,
       maxTokens: 5000,
     });
 
-    // ── Deterministic score override ─────────────────────────────────────────
+    // Deterministic score override
     if (result && Array.isArray(result.stageScores) && result.stageScores.length > 0) {
       // Merge back pre-computed dimension scores and recompute each stage score deterministically
       result.stageScores = result.stageScores.map(s => {
@@ -313,6 +313,57 @@ Return JSON (no markdown):
       result.overallScore = Math.round(
         result.stageScores.reduce((sum, s) => sum + s.score, 0) / result.stageScores.length
       );
+    }
+
+    // Benchmark data (LevelShift database stats -- mock numbers for demo)
+    const overallScore = result ? result.overallScore : 50;
+    const industryAvgAutomation = overallScore > 70 ? 55 : 62;
+    result.benchmarkData = {
+      processCount: 127,
+      companyCount: 89,
+      industryAvgAutomation,
+      industryAvgSla: '2.3 days',
+      industryAvgManualSteps: 5.2,
+      improvementPotential: '35-40%',
+    };
+
+    // Industry comparison via second LLM call
+    try {
+      const comparisonResult = await requestLlm({
+        systemPrompt:
+          'You are a senior enterprise automation consultant. Return only valid JSON -- no markdown, no explanation.',
+        userPrompt: `Based on a score of ${overallScore}% for the ${processName} process, provide a brief industry comparison in JSON format with these exact fields:
+- currentState: array of exactly 3 strings describing the current automation state
+- bestPractice: array of exactly 3 strings describing industry best practices for this process
+- gaps: array of exactly 3 strings describing key optimization gaps compared to best-in-class
+- benchmark: one of exactly these strings -- "Above Average", "Average", or "Below Average" -- based on the score (Above Average if score > 70, Average if 45-70, Below Average if < 45)
+
+Return only the JSON object, no markdown.`,
+        maxTokens: 800,
+      });
+
+      result.industryComparison = comparisonResult;
+    } catch (compErr) {
+      // Fallback static industry comparison if second LLM call fails
+      const benchmarkLabel = overallScore > 70 ? 'Above Average' : overallScore >= 45 ? 'Average' : 'Below Average';
+      result.industryComparison = {
+        currentState: [
+          `${processName} automation coverage is at ${overallScore}%, indicating ${overallScore > 70 ? 'a relatively mature' : 'an emerging'} automation posture.`,
+          'Several process steps still rely on manual handoffs and human-driven data entry, increasing cycle time and error risk.',
+          'Existing tooling provides partial coverage but lacks end-to-end orchestration across the full process.',
+        ],
+        bestPractice: [
+          'Industry leaders achieve 80-90% automation coverage through integrated platforms and automation agents that handle routine process steps.',
+          'Best-in-class organizations use real-time data pipelines and analytics to eliminate manual reporting and enable proactive decision-making.',
+          'Top performers establish clear process ownership with Process Owners accountable for continuous improvement and automation adoption.',
+        ],
+        gaps: [
+          'Integration between core systems remains fragmented, causing manual re-keying and data reconciliation at key process handoffs.',
+          'Approval and notification workflows lack automated routing, resulting in delays and inconsistent process adherence.',
+          'Analytics and reporting are largely manual, preventing timely visibility into process performance and improvement opportunities.',
+        ],
+        benchmark: benchmarkLabel,
+      };
     }
 
     return NextResponse.json(result);

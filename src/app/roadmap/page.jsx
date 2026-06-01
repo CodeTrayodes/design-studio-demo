@@ -389,7 +389,7 @@ function DetailPanel({ node, isDark, onClose }) {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10 }}>
           <div style={{ flex: 1, marginRight: 8 }}>
             <span style={{ display: 'block', fontSize: 9, fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: displayAccent, marginBottom: 3 }}>
-              {isStage ? 'Process Stage' : `Phase ${d.phaseNumber} Agent`}
+              {isStage ? 'Process Stage' : `Phase ${d.phaseNumber} Automation Agent`}
             </span>
             <span style={{ display: 'block', fontSize: 15, fontFamily: '"Cormorant Garamond", serif', fontWeight: 600, color: isDark ? '#F1F1F3' : '#18181A', lineHeight: 1.3 }}>
               {isStage ? d.stageName : d.name}
@@ -450,6 +450,11 @@ function DetailPanel({ node, isDark, onClose }) {
                 </p>
               </div>
             )}
+            <div style={{ marginTop: 6, padding: '8px 10px', borderRadius: 8, background: isDark ? 'rgba(245,166,35,0.07)' : 'rgba(245,166,35,0.06)', border: `1px solid ${isDark ? 'rgba(245,166,35,0.2)' : 'rgba(245,166,35,0.25)'}` }}>
+              <p style={{ fontSize: 10, fontFamily: 'Inter, sans-serif', lineHeight: 1.6, color: isDark ? '#8E8E93' : '#4B5563', margin: 0, fontStyle: 'italic' }}>
+                This automation architecture aligns with industry best practices based on analysis of similar processes in the LevelShift database.
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -503,7 +508,7 @@ export default function RoadmapPage() {
   const onPaneClick = useCallback(() => setSelectedNode(null), []);
 
   function downloadMarkdown() {
-    let md = `# ${process?.name ?? 'Process'} — AI Activation Roadmap\n\n`;
+    let md = `# ${process?.name ?? 'Process'} — Automation Activation Roadmap\n\n`;
     if (company?.name) md += `**Company:** ${company.name}  \n`;
     md += `**Coverage:** ${discovery?.overallScore ?? 0}%  \n`;
     md += `**Generated:** ${new Date().toLocaleDateString()}  \n\n---\n\n`;
@@ -559,7 +564,7 @@ export default function RoadmapPage() {
             Complete a discovery session first.
           </p>
           <a href="/" style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: '#F5A623', textDecoration: 'none' }}>
-            ← Back to Discovery Studio
+            ← Back to ShiftAI
           </a>
         </div>
       </div>
@@ -595,7 +600,7 @@ export default function RoadmapPage() {
           <span style={{ color: isDark ? '#3A3A3C' : '#D5D0C8', fontSize: 14, flexShrink: 0 }}>|</span>
           <div style={{ minWidth: 0 }}>
             <span style={{ display: 'block', fontSize: 8, fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#F5A623', lineHeight: 1 }}>
-              AI Activation Roadmap
+              Automation Activation Roadmap
             </span>
             <span style={{ display: 'block', fontSize: 13, fontFamily: '"Cormorant Garamond", serif', fontWeight: 600, color: isDark ? '#F1F1F3' : '#18181A', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {process?.name ?? 'Roadmap'}{company?.name ? ` — ${company.name}` : ''}
@@ -608,7 +613,7 @@ export default function RoadmapPage() {
           {[
             { label: 'Coverage', value: `${overallScore}%`, color: stageColor(overallScore) },
             { label: 'Stages',   value: (discovery?.stageScores ?? []).length, color: isDark ? '#F1F1F3' : '#18181A' },
-            { label: 'Agents',   value: totalAgents, color: '#30D5C8' },
+            { label: 'Automation Agents', value: totalAgents, color: '#30D5C8' },
           ].map(s => (
             <div key={s.label} style={{ textAlign: 'center' }}>
               <div style={{ fontSize: 15, fontFamily: '"Cormorant Garamond", serif', fontWeight: 600, color: getContrastColor(s.color, isDark), lineHeight: 1 }}>{s.value}</div>

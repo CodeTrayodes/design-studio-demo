@@ -9,7 +9,7 @@ import { StepIndicator, StoryContext } from '@/components/legacy/StepContext';
 const METHODS = [
   { id: 'connect',       icon: 'â¬¡', label: 'API Integration',         badge: 'REST / HTTPS',       badgeClass: 'bg-orange-100 text-orange-700 border-orange-200', desc: 'Retrieve process metadata directly from an internal system endpoint',    color: 'from-orange-500 to-amber-600'   },
   { id: 'upload',        icon: 'â—ˆ', label: 'Document Upload',          badge: 'PDF Â· DOCX Â· Excel', badgeClass: 'bg-purple-100 text-purple-700 border-purple-200', desc: 'Upload SOPs, process maps, or operational spreadsheets (up to 3 files)', color: 'from-purple-500 to-violet-600'  },
-  { id: 'questionnaire', icon: 'â—†', label: 'Structured Questionnaire', badge: '8â€“10 questions',      badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',       desc: 'Answer a tailored set of questions covering process stages and tooling', color: 'from-blue-500 to-indigo-600'    },
+  { id: 'questionnaire', icon: 'â—†', label: 'Structured Questionnaire', badge: '8-10 questions',      badgeClass: 'bg-blue-100 text-blue-700 border-blue-200',       desc: 'Answer a tailored set of questions covering process stages and tooling', color: 'from-blue-500 to-indigo-600'    },
   { id: 'template',      icon: 'âŠ˜', label: 'Industry Benchmark',       badge: 'Fastest',            badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200', desc: 'Start from a researched benchmark of how similar organisations operate', color: 'from-emerald-500 to-teal-600' },
 ];
 
@@ -67,7 +67,7 @@ export default function InputPage() {
         More detailed input produces a higher-fidelity assessment.
       </p>
 
-      {/* Method cards â€” 2Ã—2 grid */}
+      {/* Method cards - 2x2 grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
         {METHODS.map(m => {
           const active = selectedMethod === m.id;
@@ -193,7 +193,7 @@ function ConnectPanel({ onSubmit, submitting, setSubmitting, error, setError }) 
               flexShrink: 0, opacity: (connecting || !url.startsWith('https://')) ? 0.35 : 1,
             }}
           >
-            {connecting ? <><div style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Connectingâ€¦</> : 'Connect'}
+            {connecting ? <><div style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Connecting...</> : 'Connect'}
           </button>
         </div>
         <div style={{ position: 'relative' }}>
@@ -202,7 +202,7 @@ function ConnectPanel({ onSubmit, submitting, setSubmitting, error, setError }) 
             type="password"
             value={bearerToken}
             onChange={e => { setBearerToken(e.target.value); setConnected(false); setPreviewText(''); }}
-            placeholder="Token (optional â€” leave blank for public endpoints)"
+            placeholder=”Token (optional - leave blank for public endpoints)”
             className="form-input"
             style={{ paddingLeft: 60, fontFamily: 'IBM Plex Mono' }}
           />
@@ -224,7 +224,7 @@ function ConnectPanel({ onSubmit, submitting, setSubmitting, error, setError }) 
           </div>
           <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fontWeight: 700, color: 'var(--c-mu)', marginBottom: 4 }}>Response preview:</p>
           <pre style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-tx)', background: 'var(--c-sf)', borderRadius: 3, padding: '8px 10px', border: '1px solid var(--c-b)', overflowX: 'auto', whiteSpace: 'pre-wrap', maxHeight: 120, fontSize: 10 }}>
-            {previewText}{previewText.length === 500 ? 'â€¦' : ''}
+            {previewText}{previewText.length === 500 ? '...' : ''}
           </pre>
         </div>
       )}
@@ -287,7 +287,7 @@ function UploadPanel({ onSubmit, submitting, setSubmitting, error, setError }) {
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-sm">ðŸ“„</div>
         <div>
           <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-tx)' }}>Upload process documentation</h2>
-          <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-mu)' }}>SOPs, flowcharts, spreadsheets â€” up to 3 files, 10 MB each</p>
+          <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-mu)' }}>SOPs, flowcharts, spreadsheets - up to 3 files, 10 MB each</p>
         </div>
       </div>
 
@@ -331,7 +331,7 @@ function UploadPanel({ onSubmit, submitting, setSubmitting, error, setError }) {
 
       <button className="btn-primary" onClick={handleSubmit} disabled={uploading || !files.length}>
         {uploading ? (
-          <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Extracting &amp; processingâ€¦</>
+          <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Extracting &amp; processing...</>
         ) : 'Run Analysis â†’'}
       </button>
     </div>
@@ -385,15 +385,15 @@ function QuestionnairePanel({ process, onSubmit, submitting, setSubmitting, erro
     const formatted = questions
       .map(q => `Q: ${q.text}\nA: ${answers[q.id]?.trim() || '(not provided)'}`)
       .join('\n\n');
-    onSubmit(`${process.name} Process â€” Questionnaire Responses\n\n${formatted}`, 'Questionnaire');
+    onSubmit(`${process.name} Process - Questionnaire Responses\n\n${formatted}`, 'Questionnaire');
   }
 
   if (loadingQs) {
     return (
       <div className="card animate-fade-in-up" style={{ padding: 40, textAlign: 'center' }}>
         <div style={{ width: 36, height: 36, border: '3px solid var(--c-ac)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-        <p style={{ fontSize: 13, color: 'var(--c-mu)' }}>Generating questions tailored to <strong style={{ color: 'var(--c-tx)' }}>{process.name}</strong>â€¦</p>
-        <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-dm)', marginTop: 4 }}>8â€“10 questions covering objectives, pain points, stakeholders &amp; more</p>
+        <p style={{ fontSize: 13, color: 'var(--c-mu)' }}>Generating questions tailored to <strong style={{ color: 'var(--c-tx)' }}>{process.name}</strong>...</p>
+        <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-dm)', marginTop: 4 }}>8-10 questions covering objectives, pain points, stakeholders &amp; more</p>
       </div>
     );
   }
@@ -428,7 +428,7 @@ function QuestionnairePanel({ process, onSubmit, submitting, setSubmitting, erro
           key={q?.id}
           value={answers[q?.id] || ''}
           onChange={e => setAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
-          placeholder={q?.placeholder || 'Type your answer hereâ€¦'}
+          placeholder={q?.placeholder || 'Type your answer here...'}
           rows={4}
           className="form-input"
         />
@@ -515,7 +515,7 @@ function TemplatePanel({ process, onSubmit, submitting, setSubmitting, error, se
           <div style={{ width: 20, height: 20, border: '2.5px solid var(--c-gr)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
         </div>
         <p className="section-tag" style={{ marginBottom: 4 }}>Industry Intelligence</p>
-        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-tx)', marginBottom: 3 }}>Researching best practices for <span style={{ color: 'var(--c-gr)' }}>{process.name}</span>â€¦</p>
+        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--c-tx)', marginBottom: 3 }}>Researching best practices for <span style={{ color: 'var(--c-gr)' }}>{process.name}</span>...</p>
         <p style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--c-dm)', marginBottom: 16 }}>Analysing how leading enterprises run this process</p>
         <div className="stagger-children" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {['Identifying key stages', 'Mapping common tool stacks', 'Surfacing typical pain points'].map((step, i) => (
@@ -542,7 +542,7 @@ function TemplatePanel({ process, onSubmit, submitting, setSubmitting, error, se
     );
   }
 
-  /* Strip parenthetical descriptions from tool names â€” show just the product/brand */
+  /* Strip parenthetical descriptions from tool names - show just the product/brand */
   function cleanToolName(raw) {
     return raw
       .replace(/\s*\(or equivalent[^)]*\)/i, '')
@@ -578,7 +578,7 @@ function TemplatePanel({ process, onSubmit, submitting, setSubmitting, error, se
         </button>
       </div>
 
-      {/* Process stages â€” numbered list, not chips */}
+      {/* Process stages - numbered list, not chips */}
       {highlights.length > 0 && (
         <div style={{ borderBottom: '1px solid var(--c-b)' }}>
           <div style={{ padding: '10px 20px 6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -643,7 +643,7 @@ function TemplatePanel({ process, onSubmit, submitting, setSubmitting, error, se
       <div style={{ padding: 20 }}>
         <label className="form-label" style={{ marginBottom: 8 }}>
           Process Description{' '}
-          <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'var(--c-dm)' }}>â€” review and adjust for your environment</span>
+          <span style={{ fontWeight: 400, textTransform: 'none', letterSpacing: 0, color: 'var(--c-dm)' }}>- review and adjust for your environment</span>
         </label>
         <textarea value={edited} onChange={e => setEdited(e.target.value)} rows={7} className="form-input" style={{ lineHeight: 1.7 }} />
       </div>

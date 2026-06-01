@@ -5,15 +5,15 @@ import { ArrowRight, Check } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function OrgContextCard({ isDark, onConfirm }) {
-  const [orgName,   setOrgName]   = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [confirmed, setConfirmed] = useState(false);
 
-  const ready = orgName.trim().length > 1;
+  const ready = companyName.trim().length > 1;
 
   function confirm() {
     if (!ready) return;
     setConfirmed(true);
-    onConfirm(orgName.trim());
+    onConfirm({ companyName: companyName.trim(), industry: "", governance: [] });
   }
 
   if (confirmed) {
@@ -22,10 +22,14 @@ export default function OrgContextCard({ isDark, onConfirm }) {
         isDark ? "bg-[#1C1C1E] border-[#3A3A3C]" : "bg-white border-[#D5D0C8]"
       }`}>
         <div>
-          <p className={`text-[10px] font-mono uppercase tracking-wider mb-0.5 ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>Organisation confirmed</p>
-          <p className={`text-sm font-sans ${isDark ? "text-[#F1F1F3]" : "text-[#18181A]"}`}>{orgName}</p>
+          <p className={`text-[10px] font-mono uppercase tracking-wider mb-0.5 ${isDark ? "text-[#30D5C8]" : "text-[#0D9488]"}`}>
+            Organisation confirmed
+          </p>
+          <p className={`text-sm font-sans ${isDark ? "text-[#F1F1F3]" : "text-[#18181A]"}`}>
+            {companyName}
+          </p>
         </div>
-        <Check size={15} className={`shrink-0 ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`} />
+        <Check size={15} className={`shrink-0 ${isDark ? "text-[#30D5C8]" : "text-[#0D9488]"}`} />
       </div>
     );
   }
@@ -34,18 +38,29 @@ export default function OrgContextCard({ isDark, onConfirm }) {
     <div className={`rounded-2xl border overflow-hidden ${
       isDark ? "bg-[#1C1C1E] border-[#3A3A3C]" : "bg-white border-[#D5D0C8]"
     }`}>
-      <div className="p-5 space-y-4">
+      <div className="p-5 space-y-5">
+        {/* Header */}
+        <div>
+          <p className={`text-sm font-semibold font-sans ${isDark ? "text-[#F1F1F3]" : "text-[#18181A]"}`}>
+            Who are we analyzing today?
+          </p>
+          <p className={`text-[11px] font-mono mt-1 ${isDark ? "text-[#8E8E93]" : "text-[#3D3D44]"}`}>
+            Enter your company name to begin process discovery
+          </p>
+        </div>
+
+        {/* Company name input */}
         <div>
           <label className={`block text-[10px] font-mono uppercase tracking-wider mb-2 ${
             isDark ? "text-[#8E8E93]" : "text-[#3D3D44]"
           }`}>
-            Organisation name
+            Company name
           </label>
           <div className={`border-b pb-1.5 ${isDark ? "border-[#3A3A3C]" : "border-[#D5D0C8]"}`}>
             <input
               type="text"
-              value={orgName}
-              onChange={e => setOrgName(e.target.value)}
+              value={companyName}
+              onChange={e => setCompanyName(e.target.value)}
               onKeyDown={e => e.key === "Enter" && ready && confirm()}
               placeholder="e.g. Walmart"
               autoFocus
@@ -54,11 +69,9 @@ export default function OrgContextCard({ isDark, onConfirm }) {
               }`}
             />
           </div>
-          <p className={`text-[10px] font-mono mt-1.5 ${isDark ? "text-[#8E8E93]/60" : "text-[#3D3D44]/60"}`}>
-            We'll research your company's tech landscape and process benchmarks
-          </p>
         </div>
 
+        {/* Continue button */}
         <motion.button
           onClick={confirm}
           disabled={!ready}
@@ -70,7 +83,7 @@ export default function OrgContextCard({ isDark, onConfirm }) {
               : `cursor-not-allowed ${isDark ? "bg-[#3A3A3C] text-[#8E8E93]" : "bg-[#E6E2DB] text-[#3D3D44]"}`
           }`}
         >
-          <span>Profile organisation</span>
+          <span>Continue</span>
           <ArrowRight size={12} />
         </motion.button>
       </div>

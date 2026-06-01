@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useCallback, useRef } from 'react';
 import { PROCESSES } from '@/lib/processes';
@@ -34,7 +34,7 @@ function transformDiscovery(processName, discovery) {
     maturity:       parseFloat(((s.score ?? 50) / 100 * 5).toFixed(1)),
     effort:         s.priority === 'HIGH' ? 'high' : s.priority === 'MEDIUM' ? 'medium' : 'low',
     impact:         s.phase   === 'Phase 1' ? 'high' : s.phase === 'Phase 2' ? 'medium' : 'low',
-    recommendation: s.gap || 'Automation opportunities identified across this stage',
+    recommendation: s.gap || 'Automation targets identified across this process step',
   }));
   const worst = [...stages].sort((a, b) => a.maturity - b.maturity)[0];
   return {
@@ -43,11 +43,11 @@ function transformDiscovery(processName, discovery) {
     estimatedWeeklyLeak: leakFromMaturity(overallMaturity),
     summary: discovery.executiveSummary ?? '',
     stages,
-    topBottleneck: worst ? `${worst.name} â€” ${worst.recommendation}` : null,
+    topBottleneck: worst ? `${worst.name} -- ${worst.recommendation}` : null,
   };
 }
 
-/* â”€â”€ Hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* -- Hook ----------------------------------------------------------------- */
 
 export function useConversation() {
   const [messages,         setMessages]         = useState([]);
@@ -56,11 +56,19 @@ export function useConversation() {
   const [analysisApiReady, setAnalysisApiReady] = useState(false);
   const [sessionId]                              = useState(uid);
 
-  // stage: idle | awaiting_company | researching | tool_selection | context_input | analyzing | complete
+  // stage: idle | awaiting_company | researching | awaiting_company_verification | awaiting_process_selection | tool_selection | context_input | analyzing | complete
   const stage   = useRef('idle');
-  const context = useRef({ processId: null, processObj: null, companyName: null });
+  const context = useRef({
+    processId:         null,
+    processObj:        null,
+    companyName:       null,
+    industry:          '',
+    governance:        [],
+    companyBrief:      '',
+    industryProcesses: [],
+  });
 
-  /* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- helpers -------------------------------------------------------------- */
 
   function addMessage(msg) {
     setMessages(prev => [...prev, { id: uid(), ...msg }]);
@@ -76,7 +84,7 @@ export function useConversation() {
     setMessages(prev => prev.map(m => m.id === id ? { ...m, content } : m));
   }
 
-  /* â”€â”€ background analysis â€” called immediately on confirmContext â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- background analysis -- called immediately on confirmContext ---------- */
 
   async function startAnalysisBackground(proc, tech, ctxPayload) {
     try {
@@ -118,15 +126,15 @@ export function useConversation() {
         topBottleneck: null,
       });
     } finally {
-      // Always unblock progress â€” no matter what happened above
+      // Always unblock progress -- no matter what happened above
       setAnalysisApiReady(true);
     }
   }
 
-  /* â”€â”€ research â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- research ------------------------------------------------------------- */
 
   async function doResearch() {
-    const { processId, processObj, companyName } = context.current;
+    const { processId, processObj, companyName, industry, governance } = context.current;
     stage.current = 'researching';
     setStreaming(true);
     const typId = addTyping();
@@ -140,36 +148,40 @@ export function useConversation() {
           companyDescription: '',
           processId:   processId ?? 'custom',
           processName: processObj?.name ?? processId ?? 'Custom Process',
+          industry:    industry || '',
+          governance:  governance || [],
         }),
       });
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error ?? 'Research failed');
 
-      // Resolve process â€” merge AI stages for custom, use existing for known
+      // Resolve process -- merge AI stages for custom, use existing for known
       const finalProcess = processObj
         ? (processId === 'custom' && data.stages?.length ? { ...processObj, stages: data.stages } : processObj)
         : { id: processId ?? 'custom', name: data.processDescription ?? 'Custom Process', stages: data.stages ?? [] };
 
       context.current.processObj = finalProcess;
 
+      // Store company brief and industry processes from research response
+      context.current.companyBrief      = data.companyBrief ?? '';
+      context.current.industryProcesses = data.industryProcesses ?? [];
+
       localStorage.setItem('demo_process',  JSON.stringify(finalProcess));
       localStorage.setItem('demo_company',  JSON.stringify({ name: companyName }));
       localStorage.setItem('demo_research', JSON.stringify(data));
 
-      const snippet = (data.companyProfile?.summary ?? '').slice(0, 160);
-      const intro   = snippet
-        ? `Profile complete for **${companyName}**. ${snippet}`
-        : `Profile complete for **${companyName}**. Now let's map your tech stack.`;
+      resolveTyping(typId, `Company profile ready for **${companyName}**. Please review the summary below.`);
 
-      resolveTyping(typId, `${intro} Select the tools your team uses below.`);
-
-      // Pass inferred stack so ToolSelector can pre-select matching tools
+      // Transition to company verification instead of directly to tool_selection
       addMessage({
-        role: 'assistant',
-        type: 'tool-selection',
-        inferredStack: data.inferredTechStack ?? {},
+        role:         'assistant',
+        type:         'company-verification',
+        companyBrief: data.companyBrief || '',
+        companyName:  context.current.companyName,
+        industry:     context.current.industry,
+        governance:   context.current.governance,
       });
-      stage.current = 'tool_selection';
+      stage.current = 'awaiting_company_verification';
     } catch (err) {
       resolveTyping(typId, `Something went wrong: ${err.message}. Please try again.`);
       stage.current = 'idle';
@@ -178,7 +190,7 @@ export function useConversation() {
     }
   }
 
-  /* â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- public API ----------------------------------------------------------- */
 
   const sendMessage = useCallback(async (text, opts = {}) => {
     if (streaming) return;
@@ -193,7 +205,7 @@ export function useConversation() {
       context.current.processId  = detectedId;
       context.current.processObj = detectedId ? (PROCESSES[detectedId] ?? null) : null;
 
-      // Try to extract company inline (e.g. "audit Acme Corp'sâ€¦")
+      // Try to extract company inline (e.g. "discover Acme Corp's...")
       const m = text.match(/(?:for|at|of)\s+([A-Z][A-Za-z0-9\s&,.']{1,40})(?:\s+process|\b|$)/);
       const companyGuess = m?.[1]?.trim();
 
@@ -203,7 +215,7 @@ export function useConversation() {
         const label = context.current.processObj?.name ?? 'that process';
         addMessage({
           role: 'assistant',
-          content: `Auditing **${label}** for **${companyGuess}**. Building their profile now â€” ~20 seconds.`,
+          content: `Running process discovery for **${label}** at **${companyGuess}**. Building their profile now -- ~20 seconds.`,
         });
         await doResearch();
       } else {
@@ -213,7 +225,7 @@ export function useConversation() {
         // Show org card instead of plain text
         addMessage({
           role: 'assistant',
-          content: `Let's audit your **${label}** process. Which organisation are we assessing?`,
+          content: `Let's run process discovery on your **${label}** process. Which organisation are we assessing?`,
         });
         addMessage({ role: 'assistant', type: 'org-context' });
       }
@@ -223,7 +235,7 @@ export function useConversation() {
       setStreaming(false);
       addMessage({
         role: 'assistant',
-        content: `Profiling **${text.trim()}** â€” pulling company data and benchmarks. ~20 seconds.`,
+        content: `Profiling **${text.trim()}** -- pulling company data and benchmarks. ~20 seconds.`,
       });
       await doResearch();
     } else {
@@ -235,14 +247,98 @@ export function useConversation() {
     }
   }, [streaming]);
 
-  const confirmOrg = useCallback(async (orgName) => {
-    context.current.companyName = orgName;
-    addMessage({ role: 'user', content: orgName });
+  const confirmOrg = useCallback(async ({ companyName, industry, governance } = {}) => {
+    // Works from both idle (hero submit) and awaiting_company (OrgContextCard in chat)
+    context.current.companyName = companyName ?? '';
+    context.current.industry    = industry ?? '';
+    context.current.governance  = governance ?? [];
+    // Reset process so ProcessSelectionCard appears after company verification
+    if (stage.current === 'idle') {
+      context.current.processId  = null;
+      context.current.processObj = null;
+    }
+    addMessage({ role: 'user', content: companyName });
     addMessage({
       role: 'assistant',
-      content: `Profiling **${orgName}** â€” pulling company data and benchmarks. ~20 seconds.`,
+      content: `Profiling **${companyName}** -- pulling company data and benchmarks. ~20 seconds.`,
     });
     await doResearch();
+  }, []);
+
+  const confirmCompanyBrief = useCallback(async (verified, editedBrief = null) => {
+    if (verified) {
+      if (editedBrief !== null) {
+        context.current.companyBrief = editedBrief;
+      }
+
+      if (context.current.processId) {
+        // Process already selected (e.g. via quick-select or initial message) -- go straight to tool selection
+        stage.current = 'tool_selection';
+        addMessage({
+          role: 'assistant',
+          content: `Company profile confirmed. Now let's map your tech stack.`,
+        });
+        addMessage({
+          role:          'assistant',
+          type:          'tool-selection',
+          inferredStack: JSON.parse(localStorage.getItem('demo_research') ?? '{}')?.inferredTechStack ?? {},
+        });
+      } else {
+        // No process selected yet -- ask user to pick one
+        stage.current = 'awaiting_process_selection';
+        addMessage({
+          role:                   'assistant',
+          type:                   'process-selection',
+          industry:               context.current.industry,
+          companyName:            context.current.companyName,
+          processRecommendations: context.current.industryProcesses || [],
+        });
+      }
+    } else {
+      // User rejected the brief -- restart company input
+      stage.current = 'awaiting_company';
+      addMessage({
+        role:    'assistant',
+        content: "No problem! Let me ask again - what company are we working with?",
+      });
+      addMessage({ role: 'assistant', type: 'org-context' });
+    }
+  }, []);
+
+  const confirmProcessSelection = useCallback((processId, customProcess = null) => {
+    if (customProcess) {
+      context.current.processId         = 'custom';
+      context.current.processName       = customProcess;
+      context.current.customProcessDesc = customProcess;
+      context.current.processObj        = { id: 'custom', name: customProcess, stages: [] };
+    } else if (processId && PROCESSES[processId]) {
+      context.current.processId   = processId;
+      context.current.processObj  = PROCESSES[processId];
+      context.current.processName = PROCESSES[processId].name;
+    } else {
+      context.current.processId   = processId;
+      context.current.processName = processId;
+      if (!context.current.processObj) {
+        context.current.processObj = { id: processId, name: processId, stages: [] };
+      }
+    }
+
+    stage.current = 'tool_selection';
+
+    const procName = context.current.processName ?? processId ?? 'selected process';
+    addMessage({
+      role:    'user',
+      content: `Selected process: ${procName}`,
+    });
+    addMessage({
+      role:    'assistant',
+      content: `Process selected: **${procName}**. Now let's map your tech stack.`,
+    });
+    addMessage({
+      role:          'assistant',
+      type:          'tool-selection',
+      inferredStack: JSON.parse(localStorage.getItem('demo_research') ?? '{}')?.inferredTechStack ?? {},
+    });
   }, []);
 
   const confirmTools = useCallback((tools) => {
@@ -251,7 +347,7 @@ export function useConversation() {
     localStorage.setItem('demo_tech', JSON.stringify(tools));
     addMessage({
       role: 'assistant',
-      content: `Stack confirmed. To produce the highest-fidelity assessment, provide additional context about your current process.`,
+      content: `Stack confirmed. To produce the highest-fidelity process discovery, provide additional context about your current process.`,
     });
     addMessage({ role: 'assistant', type: 'context-input' });
     stage.current = 'context_input';
@@ -276,19 +372,19 @@ export function useConversation() {
     addMessage({ role: 'assistant', type: 'analysis' });
     stage.current = 'analyzing';
 
-    // Kick off API calls immediately â€” progress animation runs in parallel
+    // Kick off API calls immediately -- progress animation runs in parallel
     const proc = context.current.processObj;
     const tech = JSON.parse(localStorage.getItem('demo_tech') ?? '{}');
     if (proc) {
       startAnalysisBackground(proc, tech, ctxPayload);
     } else {
-      // No process context â€” unblock immediately with fallback
+      // No process context -- unblock immediately with fallback
       setAnalysisApiReady(true);
     }
   }, []);
 
   const runAnalysis = useCallback(() => {
-    // Called by AnalysisProgress.onComplete â€” data already in state
+    // Called by AnalysisProgress.onComplete -- data already in state
     addMessage({ role: 'assistant', type: 'report' });
     stage.current = 'complete';
   }, []);
@@ -301,7 +397,15 @@ export function useConversation() {
     setAnalysisApiReady(false);
     setStreaming(false);
     stage.current   = 'idle';
-    context.current = { processId: null, processObj: null, companyName: null };
+    context.current = {
+      processId:         null,
+      processObj:        null,
+      companyName:       null,
+      industry:          '',
+      governance:        [],
+      companyBrief:      '',
+      industryProcesses: [],
+    };
   }, []);
 
   return {
@@ -312,10 +416,11 @@ export function useConversation() {
     sessionId,
     sendMessage,
     confirmOrg,
+    confirmCompanyBrief,
+    confirmProcessSelection,
     confirmTools,
     confirmContext,
     runAnalysis,
     reset,
   };
 }
-

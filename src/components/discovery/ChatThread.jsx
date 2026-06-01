@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import OrgContextCard   from './OrgContextCard';
-import ToolSelector     from './ToolSelector';
-import ContextInput     from './ContextInput';
-import AnalysisProgress from './AnalysisProgress';
-import MaturityReport   from './MaturityReport';
+import OrgContextCard          from './OrgContextCard';
+import ToolSelector            from './ToolSelector';
+import ContextInput            from './ContextInput';
+import AnalysisProgress        from './AnalysisProgress';
+import MaturityReport          from './MaturityReport';
+import CompanyVerificationCard from './CompanyVerificationCard';
+import ProcessSelectionCard    from './ProcessSelectionCard';
 
 function TypingDots() {
   return (
@@ -41,6 +43,7 @@ function AssistantBubble({
   message, isDark, isStreaming,
   onOrgConfirm, onToolsConfirm, onContextConfirm, onAnalysisDone,
   analysisResult, analysisApiReady,
+  onConfirmCompanyBrief, onConfirmProcessSelection,
 }) {
   if (message.type === 'org-context') {
     return (
@@ -77,6 +80,35 @@ function AssistantBubble({
       </motion.div>
     );
   }
+  if (message.type === 'company-verification') {
+    return (
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <CompanyVerificationCard
+          isDark={isDark}
+          companyBrief={message.companyBrief || ''}
+          companyName={message.companyName || ''}
+          industry={message.industry || ''}
+          governance={message.governance || []}
+          onVerified={() => onConfirmCompanyBrief(true)}
+          onEdit={(brief) => onConfirmCompanyBrief(true, brief)}
+          onRetry={() => onConfirmCompanyBrief(false)}
+        />
+      </motion.div>
+    );
+  }
+  if (message.type === 'process-selection') {
+    return (
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        <ProcessSelectionCard
+          isDark={isDark}
+          industry={message.industry || ''}
+          companyName={message.companyName || ''}
+          processRecommendations={message.processRecommendations || []}
+          onSelect={onConfirmProcessSelection}
+        />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -108,6 +140,8 @@ export default function ChatThread({
   onAnalysisDone,
   analysisResult,
   analysisApiReady,
+  onConfirmCompanyBrief = () => {},
+  onConfirmProcessSelection = () => {},
 }) {
   const bottomRef = useRef(null);
 
@@ -133,6 +167,8 @@ export default function ChatThread({
               onAnalysisDone={onAnalysisDone}
               analysisResult={analysisResult}
               analysisApiReady={analysisApiReady}
+              onConfirmCompanyBrief={onConfirmCompanyBrief}
+              onConfirmProcessSelection={onConfirmProcessSelection}
             />
           )
         )}

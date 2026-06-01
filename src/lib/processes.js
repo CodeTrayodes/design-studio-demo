@@ -65,14 +65,14 @@ export const PROCESSES = {
     tagline: 'From transaction capture to financial close — accelerated',
     timeEstimate: '8 minutes',
     exampleFinding: 'Finance teams cut close cycles by 40% by automating journal entries, reconciliations and reporting.',
-    whatYouDiscover: ['Journal entry automation', 'Reconciliation efficiency', 'Close management', 'Financial reporting', 'Audit readiness'],
+    whatYouDiscover: ['Journal entry automation', 'Reconciliation efficiency', 'Close management', 'Financial reporting', 'Compliance readiness'],
     stages: [
       { id: 'r2r-1', name: 'Transaction Recording', description: 'Automated journal entries, sub-ledger postings, intercompany eliminations.' },
       { id: 'r2r-2', name: 'Account Reconciliation', description: 'Balance sheet reconciliations, bank reconciliations, variance investigation.' },
       { id: 'r2r-3', name: 'Period-End Close', description: 'Close checklist management, accruals, prepayments, depreciation runs.' },
       { id: 'r2r-4', name: 'Consolidation', description: 'Legal entity consolidation, FX translation, intercompany elimination, GAAP adjustments.' },
       { id: 'r2r-5', name: 'Financial Reporting', description: 'P&L, balance sheet, cash flow statements, management reporting packages.' },
-      { id: 'r2r-6', name: 'Audit & Compliance', description: 'Audit trail maintenance, SOX controls, regulatory filings, statutory reporting.' },
+      { id: 'r2r-6', name: 'Analysis & Compliance', description: 'Compliance trail maintenance, SOX controls, regulatory filings, statutory reporting.' },
     ],
   },
   'issue-to-resolution': {

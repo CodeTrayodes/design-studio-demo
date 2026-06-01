@@ -85,7 +85,7 @@ export default function SetupPage() {
       {/* Page header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button className="btn-back" onClick={() => router.push('/')}>â†</button>
+          <button className="btn-back" onClick={() => router.push('/')}>←</button>
           <div>
             <p className="section-tag" style={{ marginBottom: 2 }}>Technology Stack</p>
             <h1 style={{ fontSize: 16, fontWeight: 600, color: 'var(--c-tx)', letterSpacing: '-0.01em' }}>
@@ -169,7 +169,7 @@ export default function SetupPage() {
       {totalSelected > 0 && (
         <div className="panel animate-slide-down" style={{ padding: 16, marginBottom: 16 }}>
           <p className="section-tag" style={{ marginBottom: 10 }}>
-            Your technology toolkit Â· {totalSelected} tools
+            Your technology toolkit . {totalSelected} tools
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {TECH_CATEGORIES.map(cat =>

@@ -25,10 +25,10 @@ export default function Header() {
         <div className={`hidden sm:block h-4 w-px ${isDark ? 'bg-[#3A3A3C]' : 'bg-[#D5D0C8]'}`} />
         <div className="hidden sm:block">
           <p className={`font-sans text-sm font-medium tracking-tight ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
-            Discovery Studio
+            ShiftAI
           </p>
           <p className={`font-mono text-[9px] uppercase tracking-widest ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-            Operational Intelligence
+            by LevelShift
           </p>
         </div>
       </div>

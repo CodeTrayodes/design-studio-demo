@@ -515,7 +515,7 @@ export default function ResultsPage() {
 
           {/* Pain Points + Opportunities */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Section title="Pain Points">
+            <Section title="Improvement Opportunities">
               <ul className="space-y-2">
                 {(assessment.painPoints || []).map((p, i) => (
                   <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
@@ -563,7 +563,7 @@ export default function ResultsPage() {
             <ArchDiagram architecture={architecture} />
           </Section>
 
-          <Section title="AI Agents">
+          <Section title="Automation Agents">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(architecture.agents || []).map((agent, i) => (
                 <div key={agent.id} className="border border-slate-200 rounded-lg p-4">

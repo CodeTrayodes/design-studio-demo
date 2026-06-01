@@ -1,28 +1,27 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowRight, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowRight, RefreshCw, Building2, ShieldCheck, BarChart3, Workflow } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/lib/theme';
 import { useConversation } from '@/hooks/useConversation';
-import { PROCESS_TEMPLATES } from '@/lib/processTemplates';
 import { fadeUp, staggerContainer } from '@/lib/animations';
 import ChatThread from '@/components/discovery/ChatThread';
 
 /* ── Empty-state hero ────────────────────────────────────────────────────── */
 
-function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) {
+const CAPABILITY_PILLS = [
+  { icon: Building2,    label: 'Company Profiling'    },
+  { icon: Workflow,     label: 'Process Discovery'    },
+  { icon: BarChart3,    label: 'Industry Benchmarking'},
+  { icon: ShieldCheck,  label: 'Automation Blueprint' },
+];
+
+function HeroSection({ isDark, onSubmit }) {
   const [input, setInput] = useState('');
   const inputRef          = useRef(null);
 
   useEffect(() => { inputRef.current?.focus(); }, []);
-
-  useEffect(() => {
-    if (selectedProcess && selectedProcess.id !== 'custom') {
-      setInput(`Audit our ${selectedProcess.name.toLowerCase()} process.`);
-      inputRef.current?.focus();
-    }
-  }, [selectedProcess]);
 
   function handleSubmit(e) {
     e?.preventDefault();
@@ -40,38 +39,49 @@ function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) 
       className="flex flex-col items-center justify-center text-center px-4 flex-1"
       style={{ minHeight: 'calc(100vh - 48px)' }}
     >
-      <motion.p
+      {/* Capability pills */}
+      <motion.div
         variants={fadeUp}
-        className={`font-serif text-xl md:text-[24px] font-normal italic opacity-80 mb-5 select-none ${
-          isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'
-        }`}
+        className="flex flex-wrap items-center justify-center gap-2 mb-8"
       >
-        "Describe a process, connect a tool, or upload a file."
-      </motion.p>
+        {CAPABILITY_PILLS.map(({ icon: Icon, label }) => (
+          <span
+            key={label}
+            className={`inline-flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-wider px-3 py-1.5 rounded-full border select-none ${
+              isDark
+                ? 'border-[#3A3A3C] text-[#8E8E93] bg-[#1C1C1E]'
+                : 'border-[#D5D0C8] text-[#3D3D44] bg-white'
+            }`}
+          >
+            <Icon size={10} className="text-[#F5A623]" />
+            {label}
+          </span>
+        ))}
+      </motion.div>
 
       <motion.h1
         variants={fadeUp}
-        className={`font-serif text-[28px] md:text-[42px] font-normal leading-tight tracking-tight mb-3 max-w-2xl ${
+        className={`font-serif text-[28px] md:text-[44px] font-normal leading-tight tracking-tight mb-4 max-w-2xl ${
           isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'
         }`}
       >
-        Uncover operational debt.
+        Discover your organization's
         <br />
-        <span className="text-[#F5A623]">Name the pain.</span> Deploy the fix.
+        <span className="text-[#F5A623]">automation opportunity.</span>
       </motion.h1>
 
       <motion.p
         variants={fadeUp}
-        className={`text-sm max-w-sm mb-10 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}
+        className={`text-sm max-w-md mb-10 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}
       >
-        Discovery Studio maps your workflows, quantifies financial waste, and hands
-        back configured AI agents in under three minutes.
+        Enter your company name. LevelShift profiles your organization, maps key processes
+        against industry benchmarks, and delivers a configured automation roadmap.
       </motion.p>
 
       <motion.form
         variants={fadeUp}
         onSubmit={handleSubmit}
-        className="w-full max-w-2xl mb-10"
+        className="w-full max-w-2xl mb-6"
       >
         <div className={`relative border-b pb-3 px-1 flex items-center text-xl md:text-2xl font-serif transition-all duration-300 focus-within:border-[#F5A623] ${
           isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'
@@ -82,7 +92,7 @@ function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) 
               type="text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="I want to audit our lead-to-cash process."
+              placeholder="Enter company name - e.g. Walmart, Barclays, Bupa..."
               className={`w-full bg-transparent border-none focus:outline-none pr-3 leading-snug ${
                 isDark ? 'text-white placeholder-[#8E8E93]/40' : 'text-[#18181A] placeholder-[#3D3D44]/40'
               }`}
@@ -109,36 +119,11 @@ function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) 
               <span key={op} className="w-1 h-1 rounded-full bg-[#F5A623]" style={{ opacity: op / 100 }} />
             ))}
           </div>
-          <span className="uppercase tracking-widest">Awaiting operational signals...</span>
+          <span className="uppercase tracking-widest">Ready to profile your organization...</span>
         </div>
       </motion.form>
 
-      <motion.div variants={fadeUp} className="w-full max-w-2xl">
-        <div className="flex items-center space-x-1.5 mb-3 justify-center">
-          <Sparkles size={11} className="text-[#F5A623]" />
-          <span className={`text-[11px] font-mono uppercase tracking-wider ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-            Common process audits
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-2 justify-center">
-          {PROCESS_TEMPLATES.filter(p => p.id !== 'custom').slice(0, 6).map(p => (
-            <motion.button
-              key={p.id}
-              whileHover={{ y: -2 }}
-              onClick={() => setSelectedProcess(p)}
-              className={`text-xs px-3.5 py-1.5 rounded-full border transition-all cursor-pointer ${
-                selectedProcess?.id === p.id
-                  ? 'border-[#F5A623] text-[#F5A623] bg-[#F5A623]/10'
-                  : isDark
-                  ? 'border-[#3A3A3C] text-[#8E8E93] hover:border-[#8E8E93] hover:text-[#F1F1F3]'
-                  : 'border-[#D5D0C8] text-[#3D3D44] hover:border-[#3D3D44] hover:text-[#18181A]'
-              }`}
-            >
-              {p.name}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
+   
     </motion.div>
   );
 }
@@ -146,30 +131,25 @@ function HeroSection({ isDark, onSubmit, selectedProcess, setSelectedProcess }) 
 /* ── Main page ───────────────────────────────────────────────────────────── */
 
 export default function DiscoveryPage() {
-  const { isDark }     = useTheme();
-  const conv           = useConversation();
-  const [input, setInput]                           = useState('');
-  const [selectedProcess, setSelectedProcess]       = useState(null);
-  const inputRef       = useRef(null);
+  const { isDark } = useTheme();
+  const conv       = useConversation();
+  const { confirmCompanyBrief, confirmProcessSelection } = conv;
+  const [input, setInput] = useState('');
+  const inputRef          = useRef(null);
 
   const isEmpty = conv.messages.length === 0;
 
-  useEffect(() => {
-    if (!isEmpty && selectedProcess && selectedProcess.id !== 'custom') {
-      setInput(`Audit our ${selectedProcess.name.toLowerCase()} process.`);
-    }
-  }, [selectedProcess, isEmpty]);
-
-  const handleHeroSubmit = useCallback((text) => {
-    conv.sendMessage(text, { processId: selectedProcess?.id ?? null });
-  }, [conv, selectedProcess]);
+  // Hero submit: company name goes straight to confirmOrg (company-first flow)
+  const handleHeroSubmit = useCallback((companyName) => {
+    conv.confirmOrg({ companyName: companyName.trim(), industry: '', governance: [] });
+  }, [conv]);
 
   function handleChatSubmit(e) {
     e?.preventDefault();
     if (!input.trim() || conv.streaming) return;
     const text = input.trim();
     setInput('');
-    conv.sendMessage(text, { processId: selectedProcess?.id ?? null });
+    conv.sendMessage(text);
   }
 
   return (
@@ -185,8 +165,6 @@ export default function DiscoveryPage() {
           <HeroSection
             isDark={isDark}
             onSubmit={handleHeroSubmit}
-            selectedProcess={selectedProcess}
-            setSelectedProcess={setSelectedProcess}
           />
         )}
       </AnimatePresence>
@@ -194,7 +172,7 @@ export default function DiscoveryPage() {
       {/* ── Chat thread ── */}
       {!isEmpty && (
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-3xl mx-auto px-4 pt-8 pb-44 md:px-6">
+          <div className="max-w-4xl mx-auto px-4 pt-8 pb-44 md:px-6">
             <ChatThread
               messages={conv.messages}
               streaming={conv.streaming}
@@ -205,6 +183,8 @@ export default function DiscoveryPage() {
               onAnalysisDone={conv.runAnalysis}
               analysisResult={conv.analysisResult}
               analysisApiReady={conv.analysisApiReady}
+              onConfirmCompanyBrief={confirmCompanyBrief}
+              onConfirmProcessSelection={confirmProcessSelection}
             />
           </div>
         </div>
@@ -223,7 +203,7 @@ export default function DiscoveryPage() {
               isDark ? 'bg-[#0B0B0E]/95 border-[#1C1C1E]' : 'bg-[#F3F1EC]/98 border-[#E6E2DB]'
             }`}
           >
-            <div className="max-w-3xl mx-auto px-4 md:px-6 py-3">
+            <div className="max-w-4xl mx-auto px-4 md:px-6 py-3">
               <div className="flex items-center justify-between mb-2">
                 <button
                   onClick={conv.reset}
@@ -231,7 +211,7 @@ export default function DiscoveryPage() {
                     isDark ? 'text-[#8E8E93] hover:text-[#F5A623]' : 'text-[#3D3D44] hover:text-[#F5A623]'
                   }`}
                 >
-                  <RefreshCw size={9} /><span>New audit</span>
+                  <RefreshCw size={9} /><span>New discovery</span>
                 </button>
               </div>
 

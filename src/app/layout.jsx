@@ -3,8 +3,8 @@ import { ThemeProvider } from '@/lib/theme';
 import Header from '@/components/layout/Header';
 
 export const metadata = {
-  title: 'LevelShift — Discovery Studio',
-  description: 'AI-powered business process intelligence & automation discovery',
+  title: 'ShiftAI by LevelShift',
+  description: 'AI-powered business process discovery, benchmarking & automation',
 };
 
 const themeScript = `(function(){
