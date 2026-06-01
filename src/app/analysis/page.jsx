@@ -179,14 +179,14 @@ function BenchmarkRow({ label, yours, benchmark, higherIsBetter, unit, isDark })
     : isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]';
 
   return (
-    <div className={`flex items-center justify-between py-2 border-b last:border-0 ${isDark ? 'border-[#3A3A3C]' : 'border-[#E6E2DB]'}`}>
-      <span className={`text-xs font-sans flex-1 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{label}</span>
-      <div className="flex items-center gap-6 shrink-0">
+    <div className={`flex items-start sm:items-center justify-between py-2.5 border-b last:border-0 gap-2 ${isDark ? 'border-[#3A3A3C]' : 'border-[#E6E2DB]'}`}>
+      <span className={`text-xs font-sans flex-1 min-w-0 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{label}</span>
+      <div className="flex items-center gap-3 sm:gap-6 shrink-0">
         <div className="text-right">
           <p className={`text-xs font-mono font-semibold tabular-nums ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>{yours}{unit}</p>
           <p className={`text-[9px] font-mono ${statusColor}`}>{statusLabel}</p>
         </div>
-        <div className="text-right w-16">
+        <div className="text-right w-14 sm:w-16 hidden xs:block sm:block">
           <p className={`text-xs font-mono tabular-nums ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{benchmark}{unit}</p>
           <p className={`text-[9px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>industry avg</p>
         </div>
@@ -209,7 +209,7 @@ function IndustryBenchmarkSection({ discovery, company, isDark }) {
   return (
     <div className={`rounded-2xl border overflow-hidden mb-6 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
       {/* Header */}
-      <div className={`px-5 py-4 border-b flex items-center justify-between ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}>
+      <div className={`px-4 sm:px-5 py-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}>
         <div className="flex items-center gap-2.5">
           <Database size={14} className={isDark ? 'text-[#F5A623]' : 'text-[#D4890A]'} />
           <div>
@@ -219,12 +219,12 @@ function IndustryBenchmarkSection({ discovery, company, isDark }) {
             </h3>
           </div>
         </div>
-        <span className={`text-[10px] font-mono px-2 py-1 rounded-lg border ${isDark ? 'border-[#3A3A3C] text-[#8E8E93]' : 'border-[#D5D0C8] text-[#3D3D44]'}`}>
+        <span className={`text-[10px] font-mono self-start sm:self-auto px-2 py-1 rounded-lg border ${isDark ? 'border-[#3A3A3C] text-[#8E8E93]' : 'border-[#D5D0C8] text-[#3D3D44]'}`}>
           Based on {bm.totalProcessesInDB} processes
         </span>
       </div>
 
-      <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
         {/* Benchmark comparison */}
         <div>
           <p className={`text-[10px] font-mono uppercase tracking-wider mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
@@ -510,11 +510,11 @@ export default function AnalysisPage() {
 
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
-      <div className="max-w-5xl mx-auto px-4 py-8 pb-16">
+      <div className="max-w-5xl mx-auto px-4 py-6 sm:py-8 pb-16">
 
         {/* -- Page header -- */}
-        <div className="flex items-start justify-between gap-4 mb-8">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6 sm:mb-8">
+          <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <a href="/" className={`text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors ${isDark ? 'text-[#8E8E93] hover:text-[#F5A623]' : 'text-[#3D3D44] hover:text-[#F5A623]'}`}>
                 <ArrowLeft size={11} /> ShiftAI
@@ -523,7 +523,7 @@ export default function AnalysisPage() {
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623]">
               Process Discovery Analysis
             </span>
-            <h1 className={`font-serif text-3xl font-normal mt-0.5 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
+            <h1 className={`font-serif text-2xl sm:text-3xl font-normal mt-0.5 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
               {process?.name}
             </h1>
             {company?.name && (
@@ -532,10 +532,10 @@ export default function AnalysisPage() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap sm:shrink-0">
             <button
               onClick={() => window.open('/roadmap', '_blank', 'noopener')}
-              className={`px-4 py-2 rounded-xl text-xs font-mono border transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-mono border transition-all cursor-pointer flex items-center gap-1.5 ${
                 isDark ? 'border-[#3A3A3C] text-[#8E8E93] hover:border-[#F5A623]/40 hover:text-[#F5A623]' : 'border-[#D5D0C8] text-[#3D3D44] hover:text-[#F5A623]'
               }`}
             >
@@ -543,7 +543,7 @@ export default function AnalysisPage() {
             </button>
             <button
               onClick={downloadMarkdown}
-              className="px-4 py-2 rounded-xl text-xs font-mono bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black font-semibold cursor-pointer flex items-center gap-1.5 hover:scale-[1.02] transition-all"
+              className="px-3 sm:px-4 py-2 rounded-xl text-xs font-mono bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black font-semibold cursor-pointer flex items-center gap-1.5 hover:scale-[1.02] transition-all"
             >
               <Download size={11} /> Download Report
             </button>
@@ -654,7 +654,7 @@ export default function AnalysisPage() {
                     </button>
                   )}
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+                <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
                   {discovery.stageScores.map(s => {
                     const c      = scoreColor(s.score, isDark);
                     const active = activeStageFilter === s.stageId;
@@ -662,15 +662,15 @@ export default function AnalysisPage() {
                       <button
                         key={s.stageId}
                         onClick={() => setActiveStageFilter(active ? null : s.stageId)}
-                        className={`flex-shrink-0 w-36 p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
+                        className={`flex-shrink-0 w-28 sm:w-36 p-2 sm:p-3 rounded-xl border-2 text-left transition-all cursor-pointer ${
                           active
                             ? isDark ? 'border-[#F5A623] bg-[#F5A623]/8' : 'border-[#D4890A] bg-[#D4890A]/8'
                             : isDark ? 'border-[#3A3A3C] bg-[#1C1C1E] hover:border-[#8E8E93]/40' : 'border-[#D5D0C8] bg-white hover:border-[#3D3D44]'
                         }`}
                       >
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className={`font-serif text-base tabular-nums ${c.text}`}>{maturityScore(s.score).toFixed(1)}</span>
-                          <span className={`text-[9px] font-mono font-bold px-1 py-0.5 rounded border ${priorityBadge(s.priority, isDark)}`}>{s.priority}</span>
+                          <span className={`font-serif text-sm sm:text-base tabular-nums ${c.text}`}>{maturityScore(s.score).toFixed(1)}</span>
+                          <span className={`text-[8px] sm:text-[9px] font-mono font-bold px-1 py-0.5 rounded border ${priorityBadge(s.priority, isDark)}`}>{s.priority}</span>
                         </div>
                         <div className={`h-1 rounded-full mb-1.5 overflow-hidden ${isDark ? 'bg-[#3A3A3C]' : 'bg-[#E6E2DB]'}`}>
                           <div className="h-full rounded-full" style={{ width: `${s.score}%`, backgroundColor: c.bar }} />
@@ -740,32 +740,32 @@ export default function AnalysisPage() {
         )}
 
         {/* -- Footer CTA -- */}
-        <div className="rounded-2xl p-6 bg-gradient-to-tr from-[#F5A623]/15 to-[#FF6B35]/5 border border-[#F5A623]/20">
+        <div className="rounded-2xl p-4 sm:p-6 bg-gradient-to-tr from-[#F5A623]/15 to-[#FF6B35]/5 border border-[#F5A623]/20">
           <div className="text-center max-w-lg mx-auto">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Discovery Complete</p>
-            <h2 className={`font-serif text-xl font-normal mb-2 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
+            <h2 className={`font-serif text-lg sm:text-xl font-normal mb-2 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
               {overallMaturity.toFixed(1)}/5.0 maturity -- automation roadmap ready
             </h2>
             <p className={`text-xs font-sans mb-5 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
               {(discovery.stageScores ?? []).length} process steps assessed{company?.name ? ` for ${company.name}` : ''}.
               {totalAgents > 0 ? ` ${totalAgents} automation agents scoped across 3 phases.` : ''}
             </p>
-            <div className="flex gap-3 justify-center flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center items-stretch sm:items-center flex-wrap">
               <button
                 onClick={downloadMarkdown}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black font-semibold rounded-xl text-sm cursor-pointer hover:scale-[1.02] transition-all"
+                className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black font-semibold rounded-xl text-sm cursor-pointer hover:scale-[1.02] transition-all"
               >
                 <Download size={14} /> Download Report
               </button>
               <button
                 onClick={() => window.open('/roadmap', '_blank', 'noopener')}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all ${
+                className={`flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all ${
                   isDark ? 'border-[#3A3A3C] text-[#F1F1F3] hover:border-[#F5A623]/40' : 'border-[#D5D0C8] text-[#18181A] hover:border-[#F5A623]'
                 }`}
               >
                 View Roadmap <ExternalLink size={13} />
               </button>
-              <a href="/" className={`px-5 py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all ${
+              <a href="/" className={`flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all ${
                 isDark ? 'border-[#3A3A3C] text-[#8E8E93] hover:text-[#F1F1F3]' : 'border-[#D5D0C8] text-[#3D3D44] hover:text-[#18181A]'
               }`}>
                 New Discovery

@@ -153,7 +153,7 @@ function ProfilingHero({ isDark, companyName }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="flex flex-col items-center justify-center text-center px-4 flex-1"
+      className="w-full flex flex-col items-center justify-center text-center px-6 sm:px-4"
       style={{ minHeight: 'calc(100vh - 48px)' }}
     >
       <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] flex items-center justify-center mb-6 shadow-lg shadow-[#F5A623]/25">
@@ -212,7 +212,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-6xl mx-auto px-4 py-8"
+      className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-6 sm:py-8"
     >
       {/* Company Profile Card */}
       <motion.div
@@ -221,10 +221,10 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
         transition={{ delay: 0.1 }}
         className={`rounded-2xl border p-5 mb-7 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}
       >
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex-1">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+          <div className="min-w-0">
             <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-1.5">Organisation Profile</p>
-            <h2 className={`font-serif text-2xl font-normal ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
+            <h2 className={`font-serif text-xl sm:text-2xl font-normal ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
               {profile.companyName}
             </h2>
             <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -252,7 +252,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
 
           {/* Tech stack tags */}
           {(profile.inferredTechStack ?? []).length > 0 && (
-            <div className="flex flex-wrap gap-1.5 max-w-xs">
+            <div className="flex flex-wrap gap-1.5 sm:max-w-[200px]">
               {profile.inferredTechStack.slice(0, 5).map(tool => (
                 <span
                   key={tool.name ?? tool}
@@ -292,7 +292,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
                   <span className={`text-[10px] font-mono font-semibold ${isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'}`}>
                     {gf.name}
                   </span>
-                  <span className={`text-[9px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+                  <span className={`text-[9px] font-mono hidden sm:inline ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
                     via {gf.source}
                   </span>
                 </div>
@@ -332,7 +332,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25 }}
-        className={`rounded-xl border p-3 mb-5 flex items-center justify-between gap-4 ${
+        className={`rounded-xl border p-3 mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 ${
           isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'
         }`}
       >
@@ -349,7 +349,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
             </p>
           </div>
         </div>
-        <div className={`text-[10px] font-mono shrink-0 px-2 py-1 rounded-lg border ${
+        <div className={`text-[10px] font-mono self-start sm:self-auto shrink-0 px-2 py-1 rounded-lg border ${
           isDark ? 'border-[#3A3A3C] text-[#8E8E93]' : 'border-[#D5D0C8] text-[#3D3D44]'
         }`}>
           {profile.industry} benchmarks loaded
@@ -404,7 +404,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
                 />
               )}
 
-              <p className={`text-sm font-semibold mb-0.5 pr-20 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
+              <p className={`text-sm font-semibold mb-0.5 pr-16 sm:pr-20 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
                 {p.name}
               </p>
               {meta && (
@@ -418,7 +418,7 @@ function ProfiledHero({ isDark, profile, onProcessSelect, onCustomProcess }) {
                 </p>
               )}
 
-              <div className={`flex items-center gap-3 pt-2 border-t ${isDark ? 'border-[#3A3A3C]' : 'border-[#E6E2DB]'}`}>
+              <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 pt-2 border-t ${isDark ? 'border-[#3A3A3C]' : 'border-[#E6E2DB]'}`}>
                 <span className={`text-[9px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
                   {s.companies} orgs
                 </span>
@@ -585,7 +585,7 @@ export default function DiscoveryPage() {
       {/* -- Chat thread -- */}
       {!isEmpty && (
         <div className="flex-1 overflow-y-auto">
-          <div className="max-w-5xl mx-auto px-4 pt-8 pb-44 md:px-6">
+          <div className="max-w-3xl mx-auto px-3 sm:px-4 md:px-6 pt-6 sm:pt-8 pb-36 sm:pb-44">
             <ChatThread
               messages={conv.messages}
               streaming={conv.streaming}
