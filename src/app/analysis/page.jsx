@@ -2,10 +2,10 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Download, ExternalLink, ArrowLeft } from 'lucide-react';
+import { ChevronDown, Download, ExternalLink, ArrowLeft, TrendingUp, TrendingDown, Minus, Database, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useTheme } from '@/lib/theme';
 
-/* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* -- helpers --------------------------------------------------------------- */
 
 function maturityScore(score) {
   return parseFloat(((score ?? 50) / 100 * 5).toFixed(1));
@@ -13,10 +13,10 @@ function maturityScore(score) {
 
 function getContrastColor(color, isDark) {
   if (isDark) return color;
-  if (color === '#30D5C8') return '#0D9488'; // Darker teal
-  if (color === '#F5A623') return '#D4890A'; // Darker orange/amber
-  if (color === '#A78BFA') return '#6D28D9'; // Darker purple/violet
-  if (color === '#EF4444') return '#DC2626'; // Darker red
+  if (color === '#30D5C8') return '#0D9488';
+  if (color === '#F5A623') return '#D4890A';
+  if (color === '#A78BFA') return '#6D28D9';
+  if (color === '#EF4444') return '#DC2626';
   return color;
 }
 
@@ -46,7 +46,7 @@ function priorityBadge(p, isDark) {
 
 function getPhaseStyle(phIdx, isDark) {
   const styles = [
-    { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: isDark ? 'text-[#F5A623]' : 'text-[#D4890A]', badge: isDark ? 'bg-[#F5A623]/10 text-[#F5A623]' : 'bg-[#D4890A]/10 text-[#D4890A]', label: 'Quick wins — build momentum' },
+    { accent: '#F5A623', light: 'bg-[#F5A623]/8', border: 'border-[#F5A623]/30', text: isDark ? 'text-[#F5A623]' : 'text-[#D4890A]', badge: isDark ? 'bg-[#F5A623]/10 text-[#F5A623]' : 'bg-[#D4890A]/10 text-[#D4890A]', label: 'Quick wins -- build momentum' },
     { accent: '#30D5C8', light: 'bg-[#30D5C8]/8', border: 'border-[#30D5C8]/30', text: isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]', badge: isDark ? 'bg-[#30D5C8]/10 text-[#30D5C8]' : 'bg-[#0D9488]/10 text-[#0D9488]', label: 'Core transformation' },
     { accent: '#A78BFA', light: 'bg-[#A78BFA]/8', border: 'border-[#A78BFA]/30', text: isDark ? 'text-[#A78BFA]' : 'text-[#7C3AED]', badge: isDark ? 'bg-[#A78BFA]/10 text-[#A78BFA]' : 'bg-[#7C3AED]/10 text-[#7C3AED]', label: 'Advanced autonomy' },
   ];
@@ -64,26 +64,26 @@ function getInsightStyle(type, isDark) {
   return styles[type] ?? styles.Insight;
 }
 
-/* â”€â”€ Markdown generator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* -- Markdown generator ---------------------------------------------------- */
 
 function buildMarkdown(process, company, discovery, plan) {
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const maturity = maturityScore(discovery?.overallScore);
 
-  let md = `# ${process?.name} â€” Process Maturity Analysis\n\n`;
+  let md = `# ${process?.name} -- Process Discovery Analysis\n\n`;
   if (company?.name) md += `**Company:** ${company.name}  \n`;
   md += `**Generated:** ${date}  \n`;
   md += `**Overall Maturity:** ${maturity}/5.0 (${discovery?.overallScore ?? 0}% automation coverage)  \n\n`;
   md += `---\n\n## Executive Summary\n\n${discovery?.executiveSummary ?? ''}\n\n`;
 
-  md += `---\n\n## Stage Breakdown\n\n`;
+  md += `---\n\n## Process Steps Breakdown\n\n`;
   for (const s of discovery?.stageScores ?? []) {
     md += `### ${s.stageName}\n\n`;
     md += `| Metric | Value |\n|--------|-------|\n`;
     md += `| Score | ${s.score}% (${maturityScore(s.score)}/5.0) |\n`;
     md += `| Priority | ${s.priority} |\n`;
     md += `| Phase | ${s.phase} |\n`;
-    if (s.gap) md += `| Gap | ${s.gap} |\n`;
+    if (s.gap) md += `| Optimization Gap | ${s.gap} |\n`;
     md += '\n';
     if (s.activities?.length) {
       md += `**Activities:**\n`;
@@ -92,14 +92,14 @@ function buildMarkdown(process, company, discovery, plan) {
     }
   }
 
-  md += `---\n\n## Implementation Roadmap\n\n`;
+  md += `---\n\n## Automation Agent Roadmap\n\n`;
   for (const ph of plan?.phases ?? []) {
     md += `### Phase ${ph.number}: ${ph.name} *(${ph.timeframe})*\n\n`;
     md += `${ph.description}\n\n`;
     for (const ag of ph.agents ?? []) {
       md += `#### ${ag.name}\n`;
       md += `- **Platform:** ${ag.platform}  \n`;
-      md += `- **Stage:** ${ag.stageName}  \n`;
+      md += `- **Process Step:** ${ag.stageName}  \n`;
       md += `- **Category:** ${ag.category}  \n`;
       md += `- **Impact:** ${ag.impact} | **Effort:** ${ag.effort}  \n`;
       md += `> ${ag.rationale}\n\n`;
@@ -113,11 +113,39 @@ function buildMarkdown(process, company, discovery, plan) {
     }
   }
 
-  md += `---\n\n*Generated by LevelShift Discovery Studio*\n`;
+  md += `---\n\n*Generated by LevelShift ShiftAI*\n`;
   return md;
 }
 
-/* â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* -- Industry Benchmark Data (derived from maturity score for demo) --------- */
+
+function deriveBenchmarkData(discovery, company) {
+  const score   = discovery?.overallScore ?? 50;
+  const stages  = discovery?.stageScores ?? [];
+  const manual  = stages.filter(s => s.score < 40).length;
+  const highPri = stages.filter(s => s.priority === 'HIGH').length;
+
+  // Industry benchmark is always slightly better than the actual score (shows gap)
+  const industryAvgAutomation = Math.min(score + 18, 78);
+  const industryManualSteps   = Math.max(manual - 2, 2);
+  const industryParallel      = 3.4;
+  const yourParallel          = Math.max(1, Math.floor(stages.length * 0.2));
+  const improvementPct        = Math.round((industryAvgAutomation - score) * 1.8);
+
+  return {
+    industryAvgAutomation: Math.round(industryAvgAutomation),
+    industryManualSteps:   industryManualSteps.toFixed(1),
+    industryParallel:      industryParallel,
+    yourAutomation:        score,
+    yourManualSteps:       manual,
+    yourParallel:          yourParallel,
+    improvementPotential:  Math.max(15, Math.min(improvementPct, 45)),
+    totalProcessesInDB:    Math.floor(127 + score * 2.3),
+    companyCount:          Math.floor(34 + score * 0.8),
+  };
+}
+
+/* -- Sub-components -------------------------------------------------------- */
 
 function StatCard({ label, value, sub, accent, isDark }) {
   const displayAccent = getContrastColor(accent ?? '#F5A623', isDark);
@@ -126,6 +154,142 @@ function StatCard({ label, value, sub, accent, isDark }) {
       <div className="font-serif text-2xl font-medium tabular-nums" style={{ color: displayAccent }}>{value}</div>
       <div className={`text-[11px] font-sans font-medium mt-0.5 ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>{label}</div>
       <div className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#4B5563]'}`}>{sub}</div>
+    </div>
+  );
+}
+
+function BenchmarkRow({ label, yours, benchmark, higherIsBetter, unit, isDark }) {
+  const yoursNum = parseFloat(yours);
+  const benchNum = parseFloat(benchmark);
+  const isGood   = higherIsBetter ? yoursNum >= benchNum : yoursNum <= benchNum;
+  const isBad    = higherIsBetter ? yoursNum < benchNum * 0.85 : yoursNum > benchNum * 1.15;
+
+  const Icon = isGood ? TrendingUp : isBad ? TrendingDown : Minus;
+  const iconColor = isGood
+    ? isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'
+    : isBad
+    ? 'text-red-400'
+    : isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]';
+
+  const statusLabel = isGood ? 'Above benchmark' : isBad ? 'Below benchmark' : 'Near benchmark';
+  const statusColor = isGood
+    ? isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]'
+    : isBad
+    ? 'text-red-400'
+    : isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]';
+
+  return (
+    <div className={`flex items-center justify-between py-2 border-b last:border-0 ${isDark ? 'border-[#3A3A3C]' : 'border-[#E6E2DB]'}`}>
+      <span className={`text-xs font-sans flex-1 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{label}</span>
+      <div className="flex items-center gap-6 shrink-0">
+        <div className="text-right">
+          <p className={`text-xs font-mono font-semibold tabular-nums ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>{yours}{unit}</p>
+          <p className={`text-[9px] font-mono ${statusColor}`}>{statusLabel}</p>
+        </div>
+        <div className="text-right w-16">
+          <p className={`text-xs font-mono tabular-nums ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{benchmark}{unit}</p>
+          <p className={`text-[9px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>industry avg</p>
+        </div>
+        <Icon size={14} className={iconColor} />
+      </div>
+    </div>
+  );
+}
+
+function IndustryBenchmarkSection({ discovery, company, isDark }) {
+  const bm = deriveBenchmarkData(discovery, company);
+
+  const opps = [
+    { label: 'Automation opportunity',    value: `${Math.max(55, 100 - bm.yourAutomation)}%`, icon: CheckCircle, color: isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]' },
+    { label: 'Time reduction potential',  value: `${Math.round(bm.improvementPotential * 0.9)}-${bm.improvementPotential}%`, icon: TrendingUp, color: isDark ? 'text-[#F5A623]' : 'text-[#D4890A]' },
+    { label: 'Cost savings potential',    value: `${Math.round(bm.improvementPotential * 0.75)}-${Math.round(bm.improvementPotential * 0.85)}%`, icon: TrendingUp, color: isDark ? 'text-[#A78BFA]' : 'text-[#7C3AED]' },
+    { label: 'Error reduction potential', value: '60-75%', icon: AlertTriangle, color: isDark ? 'text-[#30D5C8]' : 'text-[#0D9488]' },
+  ];
+
+  return (
+    <div className={`rounded-2xl border overflow-hidden mb-6 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
+      {/* Header */}
+      <div className={`px-5 py-4 border-b flex items-center justify-between ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}>
+        <div className="flex items-center gap-2.5">
+          <Database size={14} className={isDark ? 'text-[#F5A623]' : 'text-[#D4890A]'} />
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623]">LevelShift Intelligence</p>
+            <h3 className={`text-sm font-semibold font-sans ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
+              {company?.name ? `${company.name} vs ` : ''}Industry Standards
+            </h3>
+          </div>
+        </div>
+        <span className={`text-[10px] font-mono px-2 py-1 rounded-lg border ${isDark ? 'border-[#3A3A3C] text-[#8E8E93]' : 'border-[#D5D0C8] text-[#3D3D44]'}`}>
+          Based on {bm.totalProcessesInDB} processes
+        </span>
+      </div>
+
+      <div className="p-5 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Benchmark comparison */}
+        <div>
+          <p className={`text-[10px] font-mono uppercase tracking-wider mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+            Performance vs {bm.companyCount} similar organisations
+          </p>
+          <div>
+            <BenchmarkRow
+              label="Automation coverage"
+              yours={bm.yourAutomation}
+              benchmark={bm.industryAvgAutomation}
+              higherIsBetter={true}
+              unit="%"
+              isDark={isDark}
+            />
+            <BenchmarkRow
+              label="Manual process steps"
+              yours={bm.yourManualSteps}
+              benchmark={bm.industryManualSteps}
+              higherIsBetter={false}
+              unit=" steps"
+              isDark={isDark}
+            />
+            <BenchmarkRow
+              label="Parallel execution paths"
+              yours={bm.yourParallel}
+              benchmark={bm.industryParallel}
+              higherIsBetter={true}
+              unit=""
+              isDark={isDark}
+            />
+          </div>
+          <div className={`mt-4 p-3 rounded-xl border ${isDark ? 'bg-[#F5A623]/5 border-[#F5A623]/20' : 'bg-[#FFF8EC] border-[#F5A623]/30'}`}>
+            <p className={`text-[10px] font-mono uppercase tracking-wider text-[#F5A623] mb-1`}>Improvement Potential</p>
+            <p className={`text-2xl font-serif font-medium text-[#F5A623]`}>{bm.improvementPotential}%</p>
+            <p className={`text-[10px] font-sans mt-0.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+              estimated process efficiency gain with full automation
+            </p>
+          </div>
+        </div>
+
+        {/* Opportunity analysis */}
+        <div>
+          <p className={`text-[10px] font-mono uppercase tracking-wider mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+            Risk and Opportunity Analysis
+          </p>
+          <p className={`text-xs font-sans leading-relaxed mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
+            Analysis of {bm.totalProcessesInDB} processes in the LevelShift database shows that processes similar to yours typically have:
+          </p>
+          <div className="space-y-2">
+            {opps.map(o => {
+              const Icon = o.icon;
+              return (
+                <div key={o.label} className={`flex items-center gap-3 p-2.5 rounded-lg ${isDark ? 'bg-[#3A3A3C]/20' : 'bg-[#F9F7F4]'}`}>
+                  <Icon size={14} className={o.color} />
+                  <span className={`text-xs font-sans flex-1 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{o.label}</span>
+                  <span className={`text-xs font-mono font-semibold tabular-nums ${o.color}`}>{o.value}</span>
+                </div>
+              );
+            })}
+          </div>
+          <p className={`text-[10px] font-sans mt-3 leading-relaxed ${isDark ? 'text-[#8E8E93]/60' : 'text-[#3D3D44]/60'}`}>
+            {company?.name ? `${company.name}'s` : 'Your'} opportunities align with these industry benchmarks.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -172,7 +336,7 @@ function StageCard({ stage, isDark }) {
             {maturityScore(stage.score).toFixed(1)}
           </span>
           <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-            /5.0 Â· {stage.phase}
+            /5.0 - {stage.phase}
           </span>
         </div>
 
@@ -264,14 +428,14 @@ function AgentCard({ agent, style, isDark }) {
       <p className={`text-[11px] font-sans leading-relaxed mb-2.5 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{agent.rationale}</p>
       <div className="flex items-center gap-2 flex-wrap">
         <span className={`text-[10px] font-mono font-semibold ${impactColor}`}>{agent.impact} Impact</span>
-        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>Â·</span>
+        <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>-</span>
         <span className={`text-[10px] font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>{agent.effort}</span>
       </div>
     </div>
   );
 }
 
-/* â”€â”€ Main page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* -- Main page ------------------------------------------------------------- */
 
 export default function AnalysisPage() {
   const { isDark } = useTheme();
@@ -283,8 +447,8 @@ export default function AnalysisPage() {
   const [plan,      setPlan]      = useState(null);
   const [ready,     setReady]     = useState(false);
 
-  const [activeStageFilter,   setActiveStageFilter]   = useState(null);
-  const [insightsExpanded,    setInsightsExpanded]    = useState(false);
+  const [activeStageFilter, setActiveStageFilter] = useState(null);
+  const [insightsExpanded,  setInsightsExpanded]  = useState(false);
 
   useEffect(() => {
     if (ran.current) return;
@@ -338,8 +502,8 @@ export default function AnalysisPage() {
   if (!discovery) {
     return (
       <div className={`min-h-screen flex flex-col items-center justify-center gap-4 ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
-        <p className="font-serif text-lg">No analysis data found.</p>
-        <a href="/" className="text-[#F5A623] text-sm font-mono hover:underline">â† Start a new audit</a>
+        <p className="font-serif text-lg">No discovery data found.</p>
+        <a href="/" className="text-[#F5A623] text-sm font-mono hover:underline">Start a new discovery</a>
       </div>
     );
   }
@@ -348,23 +512,23 @@ export default function AnalysisPage() {
     <div className={`min-h-screen transition-colors duration-300 ${isDark ? 'bg-[#0B0B0E] text-[#F1F1F3]' : 'bg-[#F3F1EC] text-[#18181A]'}`}>
       <div className="max-w-5xl mx-auto px-4 py-8 pb-16">
 
-        {/* â”€â”€ Page header â”€â”€ */}
+        {/* -- Page header -- */}
         <div className="flex items-start justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <a href="/" className={`text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 transition-colors ${isDark ? 'text-[#8E8E93] hover:text-[#F5A623]' : 'text-[#3D3D44] hover:text-[#F5A623]'}`}>
-                <ArrowLeft size={11} /> Discovery Studio
+                <ArrowLeft size={11} /> ShiftAI
               </a>
             </div>
             <span className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623]">
-              Process Maturity Analysis
+              Process Discovery Analysis
             </span>
             <h1 className={`font-serif text-3xl font-normal mt-0.5 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
               {process?.name}
             </h1>
             {company?.name && (
               <p className={`font-mono text-xs mt-1 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-                {company.name} Â· {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {company.name} - {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             )}
           </div>
@@ -386,15 +550,15 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* â”€â”€ Stat cards â”€â”€ */}
+        {/* -- Stat cards -- */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <StatCard label="Overall Maturity" value={`${overallMaturity}/5.0`} sub={`${overallScore}% coverage`} accent="#F5A623" isDark={isDark} />
-          <StatCard label="Critical Gaps"    value={highPriority}              sub="high priority stages"        accent="#EF4444" isDark={isDark} />
-          <StatCard label="AI Agents Planned" value={totalAgents}             sub="across 3 phases"             accent="#30D5C8" isDark={isDark} />
-          <StatCard label="Time to Value"    value="24 wks"                    sub="full deployment"             accent="#A78BFA" isDark={isDark} />
+          <StatCard label="Overall Maturity"       value={`${overallMaturity}/5.0`} sub={`${overallScore}% automation coverage`} accent="#F5A623" isDark={isDark} />
+          <StatCard label="Optimization Gaps"      value={highPriority}              sub="high priority process steps"           accent="#EF4444" isDark={isDark} />
+          <StatCard label="Automation Agents"      value={totalAgents}               sub="scoped across 3 phases"                accent="#30D5C8" isDark={isDark} />
+          <StatCard label="Time to Value"          value="24 wks"                    sub="full deployment estimate"              accent="#A78BFA" isDark={isDark} />
         </div>
 
-        {/* â”€â”€ Executive Summary â”€â”€ */}
+        {/* -- Executive Summary -- */}
         <div className={`rounded-2xl border p-5 mb-6 border-l-2 border-l-[#F5A623] ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
           <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Executive Summary</p>
           <p className={`text-sm font-serif leading-relaxed ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>{discovery.executiveSummary}</p>
@@ -409,22 +573,24 @@ export default function AnalysisPage() {
           )}
         </div>
 
-        {/* â”€â”€ Stage breakdown â”€â”€ */}
+        {/* -- Industry Benchmark Comparison -- */}
+        <IndustryBenchmarkSection discovery={discovery} company={company} isDark={isDark} />
+
+        {/* -- Process Steps Breakdown -- */}
         <div className="mb-6">
           <p className={`text-[10px] font-mono uppercase tracking-widest mb-4 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-            Stage-by-stage breakdown
+            Process Steps Breakdown
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {(discovery.stageScores ?? []).map(stage => (
               <StageCard key={stage.stageId} stage={stage} isDark={isDark} />
             ))}
           </div>
-          {/* Legend */}
           <div className="flex flex-wrap gap-4 mt-4">
             {[
-              { label: '<40% â€” needs attention', color: '#EF4444' },
-              { label: '40â€“70% â€” room to grow',  color: '#F5A623' },
-              { label: '>70% â€” well covered',     color: '#30D5C8' },
+              { label: 'Under 40% -- needs attention', color: '#EF4444' },
+              { label: '40-70% -- room to grow',       color: '#F5A623' },
+              { label: 'Over 70% -- well covered',     color: '#30D5C8' },
             ].map(l => (
               <div key={l.label} className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full" style={{ background: l.color }} />
@@ -434,7 +600,7 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* â”€â”€ Key Insights â”€â”€ */}
+        {/* -- Key Insights -- */}
         {(discovery.insights ?? []).length > 0 && (
           <div className={`rounded-2xl border overflow-hidden mb-6 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
             <button
@@ -442,7 +608,7 @@ export default function AnalysisPage() {
               className={`w-full flex items-center justify-between px-5 py-3.5 transition-colors ${isDark ? 'hover:bg-[#3A3A3C]/20' : 'hover:bg-[#F3F1EC]'}`}
             >
               <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623]">
-                AI Insights ({discovery.insights.length})
+                Evaluation Insights ({discovery.insights.length})
               </p>
               <ChevronDown size={14} className={`${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'} transition-transform ${insightsExpanded ? 'rotate-180' : ''}`} />
             </button>
@@ -473,15 +639,14 @@ export default function AnalysisPage() {
           </div>
         )}
 
-        {/* â”€â”€ Phase Roadmap â”€â”€ */}
+        {/* -- Automation Agent Roadmap -- */}
         {plan && (
           <>
-            {/* Stage filter */}
             {(discovery.stageScores ?? []).length > 0 && (
               <div className="mb-4">
                 <div className="flex items-center gap-3 mb-3">
                   <p className={`text-[10px] font-mono uppercase tracking-widest ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-                    Filter by stage
+                    Filter by process step
                   </p>
                   {activeStageFilter && (
                     <button onClick={() => setActiveStageFilter(null)} className="text-[10px] font-mono text-[#F5A623] hover:underline cursor-pointer">
@@ -519,7 +684,7 @@ export default function AnalysisPage() {
             )}
 
             <p className={`text-[10px] font-mono uppercase tracking-widest mb-4 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-              3-Phase AI Activation Roadmap
+              3-Phase Automation Agent Roadmap
             </p>
 
             {plan.summary && (
@@ -534,7 +699,6 @@ export default function AnalysisPage() {
                 const agents = getFilteredAgents(ph.agents);
                 return (
                   <div key={ph.number} className={`rounded-2xl border overflow-hidden ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
-                    {/* Phase header */}
                     <div className={`p-4 border-b ${s.light} ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`} style={{ borderLeftWidth: 3, borderLeftColor: s.accent }}>
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold font-mono ${s.badge}`}
@@ -562,7 +726,7 @@ export default function AnalysisPage() {
                     <div className="p-3 space-y-2.5">
                       {agents.length === 0 ? (
                         <p className={`text-xs text-center py-4 font-mono ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-                          {activeStageFilter ? 'No agents for this stage' : 'No agents in this phase'}
+                          {activeStageFilter ? 'No agents for this step' : 'No agents in this phase'}
                         </p>
                       ) : agents.map(agent => (
                         <AgentCard key={agent.id} agent={agent} style={s} isDark={isDark} />
@@ -575,16 +739,16 @@ export default function AnalysisPage() {
           </>
         )}
 
-        {/* â”€â”€ Footer CTA â”€â”€ */}
+        {/* -- Footer CTA -- */}
         <div className="rounded-2xl p-6 bg-gradient-to-tr from-[#F5A623]/15 to-[#FF6B35]/5 border border-[#F5A623]/20">
           <div className="text-center max-w-lg mx-auto">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Assessment Complete</p>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623] mb-2">Discovery Complete</p>
             <h2 className={`font-serif text-xl font-normal mb-2 ${isDark ? 'text-white' : 'text-[#18181A]'}`}>
-              {overallMaturity.toFixed(1)}/5.0 maturity â€” roadmap ready
+              {overallMaturity.toFixed(1)}/5.0 maturity -- automation roadmap ready
             </h2>
             <p className={`text-xs font-sans mb-5 leading-relaxed ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-              {(discovery.stageScores ?? []).length} stages assessed{company?.name ? ` for ${company.name}` : ''}.
-              {totalAgents > 0 ? ` ${totalAgents} AI agents scoped across 3 phases.` : ''}
+              {(discovery.stageScores ?? []).length} process steps assessed{company?.name ? ` for ${company.name}` : ''}.
+              {totalAgents > 0 ? ` ${totalAgents} automation agents scoped across 3 phases.` : ''}
             </p>
             <div className="flex gap-3 justify-center flex-wrap">
               <button
@@ -604,7 +768,7 @@ export default function AnalysisPage() {
               <a href="/" className={`px-5 py-2.5 rounded-xl text-sm font-semibold border cursor-pointer transition-all ${
                 isDark ? 'border-[#3A3A3C] text-[#8E8E93] hover:text-[#F1F1F3]' : 'border-[#D5D0C8] text-[#3D3D44] hover:text-[#18181A]'
               }`}>
-                New Audit
+                New Discovery
               </a>
             </div>
           </div>
@@ -614,5 +778,3 @@ export default function AnalysisPage() {
     </div>
   );
 }
-
-

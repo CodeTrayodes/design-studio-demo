@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useCallback, useRef } from 'react';
 import { PROCESSES } from '@/lib/processes';
@@ -9,12 +9,12 @@ function uid() {
 
 function detectProcessId(text) {
   const t = text.toLowerCase();
-  if (t.includes('lead to cash')   || t.includes('lead-to-cash')   || t.includes('l2c')) return 'lead-to-cash';
-  if (t.includes('hire to retire') || t.includes('hire-to-retire') || t.includes('h2r')) return 'hire-to-retire';
-  if (t.includes('procure to pay') || t.includes('procure-to-pay') || t.includes('p2p')) return 'procure-to-pay';
-  if (t.includes('order to cash')  || t.includes('order-to-cash')  || t.includes('o2c')) return 'order-to-cash';
+  if (t.includes('lead to cash')    || t.includes('lead-to-cash')    || t.includes('l2c')) return 'lead-to-cash';
+  if (t.includes('hire to retire')  || t.includes('hire-to-retire')  || t.includes('h2r')) return 'hire-to-retire';
+  if (t.includes('procure to pay')  || t.includes('procure-to-pay')  || t.includes('p2p')) return 'procure-to-pay';
+  if (t.includes('order to cash')   || t.includes('order-to-cash')   || t.includes('o2c')) return 'order-to-cash';
   if (t.includes('record to report')|| t.includes('record-to-report')|| t.includes('r2r')) return 'record-to-report';
-  if (t.includes('issue to resolution'))                                                     return 'issue-to-resolution';
+  if (t.includes('issue to resolution'))                                                      return 'issue-to-resolution';
   return null;
 }
 
@@ -34,7 +34,7 @@ function transformDiscovery(processName, discovery) {
     maturity:       parseFloat(((s.score ?? 50) / 100 * 5).toFixed(1)),
     effort:         s.priority === 'HIGH' ? 'high' : s.priority === 'MEDIUM' ? 'medium' : 'low',
     impact:         s.phase   === 'Phase 1' ? 'high' : s.phase === 'Phase 2' ? 'medium' : 'low',
-    recommendation: s.gap || 'Automation opportunities identified across this stage',
+    recommendation: s.gap || 'Optimization targets identified across this process step',
   }));
   const worst = [...stages].sort((a, b) => a.maturity - b.maturity)[0];
   return {
@@ -43,11 +43,11 @@ function transformDiscovery(processName, discovery) {
     estimatedWeeklyLeak: leakFromMaturity(overallMaturity),
     summary: discovery.executiveSummary ?? '',
     stages,
-    topBottleneck: worst ? `${worst.name} â€” ${worst.recommendation}` : null,
+    topBottleneck: worst ? `${worst.name} -- ${worst.recommendation}` : null,
   };
 }
 
-/* â”€â”€ Hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* -- Hook ------------------------------------------------------------------ */
 
 export function useConversation() {
   const [messages,         setMessages]         = useState([]);
@@ -60,7 +60,7 @@ export function useConversation() {
   const stage   = useRef('idle');
   const context = useRef({ processId: null, processObj: null, companyName: null });
 
-  /* â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- helpers --------------------------------------------------------------- */
 
   function addMessage(msg) {
     setMessages(prev => [...prev, { id: uid(), ...msg }]);
@@ -76,7 +76,7 @@ export function useConversation() {
     setMessages(prev => prev.map(m => m.id === id ? { ...m, content } : m));
   }
 
-  /* â”€â”€ background analysis â€” called immediately on confirmContext â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- background analysis -- called immediately on confirmContext ---------- */
 
   async function startAnalysisBackground(proc, tech, ctxPayload) {
     try {
@@ -91,7 +91,7 @@ export function useConversation() {
         }),
       });
 
-      if (!discoverRes.ok) throw new Error(`Discover failed: ${discoverRes.status}`);
+      if (!discoverRes.ok) throw new Error(`Discovery failed: ${discoverRes.status}`);
       const discovery = await discoverRes.json();
       if (discovery.error) throw new Error(discovery.error);
 
@@ -107,8 +107,7 @@ export function useConversation() {
 
       setAnalysisResult(transformDiscovery(proc.name, discovery));
     } catch (err) {
-      console.error('[DS] Analysis background error:', err);
-      // Set a minimal fallback so the report still renders
+      console.error('[ShiftAI] Analysis background error:', err);
       setAnalysisResult({
         processName: proc.name,
         overallMaturity: 2.5,
@@ -118,12 +117,11 @@ export function useConversation() {
         topBottleneck: null,
       });
     } finally {
-      // Always unblock progress â€” no matter what happened above
       setAnalysisApiReady(true);
     }
   }
 
-  /* â”€â”€ research â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- research (legacy path -- company name collected mid-chat) ----------- */
 
   async function doResearch() {
     const { processId, processObj, companyName } = context.current;
@@ -145,7 +143,6 @@ export function useConversation() {
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error ?? 'Research failed');
 
-      // Resolve process â€” merge AI stages for custom, use existing for known
       const finalProcess = processObj
         ? (processId === 'custom' && data.stages?.length ? { ...processObj, stages: data.stages } : processObj)
         : { id: processId ?? 'custom', name: data.processDescription ?? 'Custom Process', stages: data.stages ?? [] };
@@ -156,14 +153,13 @@ export function useConversation() {
       localStorage.setItem('demo_company',  JSON.stringify({ name: companyName }));
       localStorage.setItem('demo_research', JSON.stringify(data));
 
-      const snippet = (data.companyProfile?.summary ?? '').slice(0, 160);
+      const snippet = (data.companyProfile?.summary ?? data.companyProfile ?? '').slice(0, 160);
       const intro   = snippet
         ? `Profile complete for **${companyName}**. ${snippet}`
         : `Profile complete for **${companyName}**. Now let's map your tech stack.`;
 
       resolveTyping(typId, `${intro} Select the tools your team uses below.`);
 
-      // Pass inferred stack so ToolSelector can pre-select matching tools
       addMessage({
         role: 'assistant',
         type: 'tool-selection',
@@ -178,7 +174,54 @@ export function useConversation() {
     }
   }
 
-  /* â”€â”€ public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+  /* -- public API ----------------------------------------------------------- */
+
+  /**
+   * Primary entry point for the new company-first landing flow.
+   * Called after the hero page has already profiled the company and the user
+   * has selected a process. Skips the org-context and research steps entirely.
+   */
+  const initWithCompany = useCallback((companyName, processId, processObj, researchData) => {
+    // Store everything so analysis + roadmap pages can read it
+    localStorage.setItem('demo_company',  JSON.stringify({ name: companyName }));
+    localStorage.setItem('demo_process',  JSON.stringify(processObj));
+    if (researchData) localStorage.setItem('demo_research', JSON.stringify(researchData));
+
+    context.current.companyName = companyName;
+    context.current.processId   = processId;
+    context.current.processObj  = processObj;
+
+    const processLabel = processObj?.name ?? processId;
+
+    // Seed the conversation with context messages
+    setMessages([
+      {
+        id: uid(),
+        role: 'user',
+        content: `Discover our ${processLabel} process.`,
+      },
+      {
+        id: uid(),
+        role: 'assistant',
+        content: `Starting **${processLabel}** process discovery for **${companyName}**. Profile loaded -- let's map your tech stack first.`,
+      },
+      {
+        id: uid(),
+        role: 'assistant',
+        type: 'tool-selection',
+        inferredStack: Array.isArray(researchData?.inferredTechStack)
+          ? researchData.inferredTechStack.reduce((acc, t) => {
+              const key = (t.category ?? 'other').toLowerCase().replace(/[^a-z]/g, '');
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(t.name ?? t);
+              return acc;
+            }, {})
+          : {},
+      },
+    ]);
+
+    stage.current = 'tool_selection';
+  }, []);
 
   const sendMessage = useCallback(async (text, opts = {}) => {
     if (streaming) return;
@@ -193,7 +236,6 @@ export function useConversation() {
       context.current.processId  = detectedId;
       context.current.processObj = detectedId ? (PROCESSES[detectedId] ?? null) : null;
 
-      // Try to extract company inline (e.g. "audit Acme Corp'sâ€¦")
       const m = text.match(/(?:for|at|of)\s+([A-Z][A-Za-z0-9\s&,.']{1,40})(?:\s+process|\b|$)/);
       const companyGuess = m?.[1]?.trim();
 
@@ -203,34 +245,32 @@ export function useConversation() {
         const label = context.current.processObj?.name ?? 'that process';
         addMessage({
           role: 'assistant',
-          content: `Auditing **${label}** for **${companyGuess}**. Building their profile now â€” ~20 seconds.`,
+          content: `Discovering **${label}** for **${companyGuess}**. Building their profile now -- approximately 20 seconds.`,
         });
         await doResearch();
       } else {
         setStreaming(false);
         const label = context.current.processObj?.name ?? 'that process';
         stage.current = 'awaiting_company';
-        // Show org card instead of plain text
         addMessage({
           role: 'assistant',
-          content: `Let's audit your **${label}** process. Which organisation are we assessing?`,
+          content: `Let's discover your **${label}** process. Which organisation are we assessing?`,
         });
         addMessage({ role: 'assistant', type: 'org-context' });
       }
     } else if (cur === 'awaiting_company') {
-      // Fallback: user typed company name as plain text (org-context card bypasses this)
       context.current.companyName = text.trim();
       setStreaming(false);
       addMessage({
         role: 'assistant',
-        content: `Profiling **${text.trim()}** â€” pulling company data and benchmarks. ~20 seconds.`,
+        content: `Profiling **${text.trim()}** -- pulling company data and benchmarks. Approximately 20 seconds.`,
       });
       await doResearch();
     } else {
       setStreaming(false);
       addMessage({
         role: 'assistant',
-        content: "I'm working through the analysis steps above. Complete them and I'll continue.",
+        content: "I'm working through the discovery steps above. Complete them and I'll continue.",
       });
     }
   }, [streaming]);
@@ -240,18 +280,18 @@ export function useConversation() {
     addMessage({ role: 'user', content: orgName });
     addMessage({
       role: 'assistant',
-      content: `Profiling **${orgName}** â€” pulling company data and benchmarks. ~20 seconds.`,
+      content: `Profiling **${orgName}** -- pulling company data and benchmarks. Approximately 20 seconds.`,
     });
     await doResearch();
   }, []);
 
   const confirmTools = useCallback((tools) => {
     const names = Object.values(tools).flat().join(', ');
-    addMessage({ role: 'user', content: `Using: ${names || 'no specific tools'}` });
+    addMessage({ role: 'user', content: `Using: ${names || 'no specific tools selected'}` });
     localStorage.setItem('demo_tech', JSON.stringify(tools));
     addMessage({
       role: 'assistant',
-      content: `Stack confirmed. To produce the highest-fidelity assessment, provide additional context about your current process.`,
+      content: `Tech stack confirmed. To produce the highest-fidelity assessment, provide additional context about your current process.`,
     });
     addMessage({ role: 'assistant', type: 'context-input' });
     stage.current = 'context_input';
@@ -260,35 +300,33 @@ export function useConversation() {
   const confirmContext = useCallback((method, data) => {
     const labels = {
       api:           'Live API data connected',
-      document:      'Document uploaded',
-      questionnaire: 'Questionnaire answers submitted',
+      document:      'Process document uploaded',
+      questionnaire: 'Process questionnaire submitted',
       benchmark:     'Industry benchmark selected',
     };
-    addMessage({ role: 'user', content: labels[method] ?? 'Context provided' });
+    addMessage({ role: 'user', content: labels[method] ?? 'Process context provided' });
 
     const ctxPayload = { method, data };
     localStorage.setItem('demo_process_context', JSON.stringify(ctxPayload));
 
     addMessage({
       role: 'assistant',
-      content: 'Running deep process analysis. This takes 20-30 seconds.',
+      content: 'Running deep process discovery. This takes 20-30 seconds.',
     });
     addMessage({ role: 'assistant', type: 'analysis' });
     stage.current = 'analyzing';
 
-    // Kick off API calls immediately â€” progress animation runs in parallel
     const proc = context.current.processObj;
     const tech = JSON.parse(localStorage.getItem('demo_tech') ?? '{}');
     if (proc) {
       startAnalysisBackground(proc, tech, ctxPayload);
     } else {
-      // No process context â€” unblock immediately with fallback
       setAnalysisApiReady(true);
     }
   }, []);
 
   const runAnalysis = useCallback(() => {
-    // Called by AnalysisProgress.onComplete â€” data already in state
+    // Show the MaturityReport card in chat — the card auto-opens /analysis on mount
     addMessage({ role: 'assistant', type: 'report' });
     stage.current = 'complete';
   }, []);
@@ -311,6 +349,7 @@ export function useConversation() {
     analysisApiReady,
     sessionId,
     sendMessage,
+    initWithCompany,
     confirmOrg,
     confirmTools,
     confirmContext,
@@ -318,4 +357,3 @@ export function useConversation() {
     reset,
   };
 }
-

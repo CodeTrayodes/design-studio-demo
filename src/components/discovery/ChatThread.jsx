@@ -86,7 +86,7 @@ function AssistantBubble({
       className="flex items-start space-x-3"
     >
       <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] flex items-center justify-center text-black text-[10px] font-bold shrink-0 mt-1 shadow-sm">
-        DS
+        SA
       </div>
       <div className={`max-w-[88%] md:max-w-[78%] text-[15px] leading-[1.75] font-serif ${isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
         {message.content

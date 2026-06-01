@@ -9,11 +9,11 @@ const STAGES = [
   { id: 2,  label: 'Identifying decision gates',       duration: 2000 },
   { id: 3,  label: 'Mapping tool dependencies',        duration: 1900 },
   { id: 4,  label: 'Calculating cycle times',          duration: 2200 },
-  { id: 5,  label: 'Detecting automation gaps',        duration: 2000 },
-  { id: 6,  label: 'Scoring maturity dimensions',      duration: 2100 },
-  { id: 7,  label: 'Benchmarking against industry',    duration: 2400 },
-  { id: 8,  label: 'Building agent deployment plan',   duration: 2200 },
-  { id: 9,  label: 'Generating optimisation model',    duration: 0    }, // gated on apiReady
+  { id: 5,  label: 'Identifying optimization targets',   duration: 2000 },
+  { id: 6,  label: 'Scoring discovery dimensions',      duration: 2100 },
+  { id: 7,  label: 'Benchmarking against industry',     duration: 2400 },
+  { id: 8,  label: 'Scoping automation agent roadmap',  duration: 2200 },
+  { id: 9,  label: 'Generating process execution blueprint', duration: 0 }, // gated on apiReady
 ];
 
 const LAST = STAGES.length - 1;
@@ -93,7 +93,7 @@ export default function AnalysisProgress({ isDark, onComplete, apiReady }) {
     <div className={`rounded-2xl border p-5 ${isDark ? 'bg-[#1C1C1E] border-[#3A3A3C]' : 'bg-white border-[#D5D0C8]'}`}>
       <div className="flex items-center justify-between mb-4">
         <span className="text-[10px] font-mono uppercase tracking-widest text-[#F5A623]">
-          Deep Process Analysis
+          Deep Process Discovery
         </span>
         <span className={`text-[10px] font-mono tabular-nums ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
           {progress}%

@@ -559,7 +559,7 @@ export default function RoadmapPage() {
             Complete a discovery session first.
           </p>
           <a href="/" style={{ fontSize: 11, fontFamily: 'JetBrains Mono, monospace', color: '#F5A623', textDecoration: 'none' }}>
-            ← Back to Discovery Studio
+            Back to ShiftAI
           </a>
         </div>
       </div>
