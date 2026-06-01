@@ -7,7 +7,7 @@ const STEPS = [
   { num: 2, label: 'Stack',    path: '/setup'    },
   { num: 3, label: 'Context',  path: '/input'    },
   { num: 4, label: 'Analysis', path: '/discover' },
-  { num: 5, label: 'Report',   path: '/plan'     },
+  { num: 5, label: 'Roadmap',  path: '/roadmap'  },
 ];
 
 export function StepIndicator({ current }) {

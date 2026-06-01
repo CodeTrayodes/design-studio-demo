@@ -273,36 +273,45 @@ function BenchmarkForm({ isDark, onSubmit }) {
 export default function ContextInput({ isDark, onConfirm }) {
   const [selectedMethods, setSelectedMethods] = useState(new Set());
   const [confirmed,       setConfirmed]       = useState(false);
-  // After clicking Continue, show the first selected method's detailed form
-  const [activeFormMethod, setActiveFormMethod] = useState(null);
+  // Phase: 'select' | 'fill'
+  const [phase,           setPhase]           = useState('select');
+  // Active tab in fill phase
+  const [activeTab,       setActiveTab]       = useState(null);
+  // Data collected per method: { api: {...}|null, upload: {...}|null, ... }
+  const [collectedData,   setCollectedData]   = useState({});
 
   function toggleMethod(id) {
     setSelectedMethods(prev => {
       const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   }
 
-  const selectedCount = selectedMethods.size;
-  const totalImprovement = Array.from(selectedMethods).reduce(
-    (sum, id) => sum + (IMPROVEMENT_MAP[id] ?? 0),
-    0
-  );
+  const selectedCount    = selectedMethods.size;
+  const methodList       = Array.from(selectedMethods);
+  const totalImprovement = methodList.reduce((s, id) => s + (IMPROVEMENT_MAP[id] ?? 0), 0);
+  const completedCount   = Object.keys(collectedData).length;
 
   function handleContinue() {
-    const methods = Array.from(selectedMethods);
-    // Show the first method's detailed form
-    setActiveFormMethod(methods[0]);
+    const first = methodList[0];
+    setActiveTab(first);
+    setPhase('fill');
   }
 
-  function handleFormSubmit(data) {
+  function handleTabSubmit(methodId, data) {
+    const updated = { ...collectedData, [methodId]: data };
+    setCollectedData(updated);
+    // Auto-advance to next unfilled tab
+    const remaining = methodList.filter(id => !updated[id]);
+    if (remaining.length > 0) {
+      setActiveTab(remaining[0]);
+    }
+  }
+
+  function handleStartAnalysis() {
     setConfirmed(true);
-    onConfirm({ methods: Array.from(selectedMethods), data });
+    onConfirm({ methods: methodList, data: collectedData });
   }
 
   if (confirmed) {
@@ -324,11 +333,11 @@ export default function ContextInput({ isDark, onConfirm }) {
           How would you like to define your process?
         </p>
         <p className={`text-[10px] font-mono uppercase tracking-wider mb-3 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-          Select one or more input sources
+          {phase === 'select' ? 'Select one or more input sources' : `${completedCount} of ${selectedCount} source${selectedCount !== 1 ? 's' : ''} provided`}
         </p>
 
-        {/* 2x2 card grid */}
-        {!activeFormMethod && (
+        {/* ── PHASE 1: Source selection grid ── */}
+        {phase === 'select' && (
           <>
             <div className="grid grid-cols-2 gap-3 mb-3">
               {METHODS.map(m => {
@@ -347,15 +356,7 @@ export default function ContextInput({ isDark, onConfirm }) {
                           : 'bg-white border border-[#D5D0C8] hover:border-[#F5A623]/50'
                     }`}
                   >
-                    {/* Checkmark top-right when selected */}
-                    {isActive && (
-                      <CheckCircle2
-                        size={15}
-                        className="absolute top-2 right-2 text-[#F5A623]"
-                      />
-                    )}
-
-                    {/* Badge top-left (when not selected, so it doesn't clash with checkmark) */}
+                    {isActive && <CheckCircle2 size={15} className="absolute top-2 right-2 text-[#F5A623]" />}
                     {m.badge && !isActive && (
                       <span className={`absolute top-2 right-2 text-[9px] font-mono px-1.5 py-0.5 rounded border ${m.badge.color}`}>
                         {m.badge.text}
@@ -366,53 +367,36 @@ export default function ContextInput({ isDark, onConfirm }) {
                         {m.badge.text}
                       </span>
                     )}
-
-                    {/* Icon */}
-                    <Icon
-                      size={20}
-                      className={`mb-2 ${isActive ? 'text-[#F5A623]' : 'text-[#8E8E93]'}`}
-                    />
-
-                    {/* Title */}
+                    <Icon size={20} className={`mb-2 ${isActive ? 'text-[#F5A623]' : 'text-[#8E8E93]'}`} />
                     <p className={`text-xs font-semibold leading-tight mb-1 ${isActive ? 'text-[#F5A623]' : isDark ? 'text-[#F1F1F3]' : 'text-[#18181A]'}`}>
                       {m.label}
                     </p>
-
-                    {/* Description */}
                     <p className={`text-[10px] leading-snug mb-2 ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
                       {m.desc}
                     </p>
-
-                    {/* Improvement badge */}
-                    <span className="text-[#30D5C8] text-[10px] font-mono">
-                      +{m.improvement}% process understanding
-                    </span>
+                    <span className="text-[#30D5C8] text-[10px] font-mono">+{m.improvement}% process understanding</span>
                   </motion.div>
                 );
               })}
             </div>
 
-            {/* Total improvement strip */}
             {selectedCount >= 1 && (
               <motion.div
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-[#30D5C8]/10 border border-[#30D5C8]/30 rounded-lg p-2 text-[#30D5C8] text-sm text-center mb-3"
               >
-                Based on {selectedCount} source{selectedCount > 1 ? 's' : ''} selected: +{totalImprovement}% better process understanding
+                {selectedCount} source{selectedCount > 1 ? 's' : ''} selected: +{totalImprovement}% better process understanding
               </motion.div>
             )}
 
-            {/* Continue button */}
             <button
               onClick={handleContinue}
               disabled={selectedCount === 0}
               className={`w-full py-2 rounded-xl text-xs font-semibold transition-all ${
                 selectedCount > 0
                   ? 'bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black cursor-pointer hover:scale-[1.01]'
-                  : isDark
-                    ? 'bg-[#3A3A3C] text-[#8E8E93] cursor-not-allowed'
-                    : 'bg-[#E6E2DB] text-[#3D3D44] cursor-not-allowed'
+                  : isDark ? 'bg-[#3A3A3C] text-[#8E8E93] cursor-not-allowed' : 'bg-[#E6E2DB] text-[#3D3D44] cursor-not-allowed'
               }`}
             >
               Continue with {selectedCount > 0 ? selectedCount : ''} Source{selectedCount !== 1 ? 's' : ''}
@@ -420,28 +404,66 @@ export default function ContextInput({ isDark, onConfirm }) {
           </>
         )}
 
-        {/* Detailed sub-form for the first selected method */}
-        {activeFormMethod && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`border-t pt-4 ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <p className={`text-[10px] font-mono uppercase tracking-wider ${isDark ? 'text-[#8E8E93]' : 'text-[#3D3D44]'}`}>
-                {METHODS.find(m => m.id === activeFormMethod)?.label}
-              </p>
+        {/* ── PHASE 2: Fill forms — one tab per selected method ── */}
+        {phase === 'fill' && (
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+
+            {/* Tab strip */}
+            <div className={`flex gap-1 mb-4 border-b pb-2 ${isDark ? 'border-[#3A3A3C]' : 'border-[#D5D0C8]'}`}>
+              {methodList.map(id => {
+                const m    = METHODS.find(x => x.id === id);
+                const done = !!collectedData[id];
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveTab(id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-mono uppercase tracking-wider transition-all cursor-pointer ${
+                      activeTab === id
+                        ? 'bg-[#F5A623]/10 text-[#F5A623] border border-[#F5A623]/40'
+                        : done
+                          ? 'bg-[#30D5C8]/10 text-[#30D5C8] border border-[#30D5C8]/30'
+                          : isDark
+                            ? 'text-[#8E8E93] border border-[#3A3A3C] hover:text-[#F1F1F3]'
+                            : 'text-[#3D3D44] border border-[#D5D0C8] hover:text-[#18181A]'
+                    }`}
+                  >
+                    {done && <CheckCircle2 size={10} />}
+                    {m?.label}
+                  </button>
+                );
+              })}
               <button
-                onClick={() => setActiveFormMethod(null)}
-                className={`text-[10px] font-mono underline cursor-pointer ${isDark ? 'text-[#8E8E93] hover:text-[#F1F1F3]' : 'text-[#3D3D44] hover:text-[#18181A]'}`}
+                onClick={() => setPhase('select')}
+                className={`ml-auto text-[10px] font-mono underline cursor-pointer ${isDark ? 'text-[#8E8E93] hover:text-[#F1F1F3]' : 'text-[#3D3D44] hover:text-[#18181A]'}`}
               >
-                Back
+                Edit sources
               </button>
             </div>
-            {activeFormMethod === 'api'           && <APIForm           isDark={isDark} onSubmit={handleFormSubmit} />}
-            {activeFormMethod === 'upload'        && <DocumentForm      isDark={isDark} onSubmit={handleFormSubmit} />}
-            {activeFormMethod === 'questionnaire' && <QuestionnaireForm isDark={isDark} onSubmit={handleFormSubmit} />}
-            {activeFormMethod === 'benchmark'     && <BenchmarkForm     isDark={isDark} onSubmit={handleFormSubmit} />}
+
+            {/* Active tab form */}
+            <div className="mb-4">
+              {activeTab === 'api'           && <APIForm           isDark={isDark} onSubmit={d => handleTabSubmit('api', d)} />}
+              {activeTab === 'upload'        && <DocumentForm      isDark={isDark} onSubmit={d => handleTabSubmit('upload', d)} />}
+              {activeTab === 'questionnaire' && <QuestionnaireForm isDark={isDark} onSubmit={d => handleTabSubmit('questionnaire', d)} />}
+              {activeTab === 'benchmark'     && <BenchmarkForm     isDark={isDark} onSubmit={d => handleTabSubmit('benchmark', d)} />}
+            </div>
+
+            {/* Progress + Start Analysis */}
+            {completedCount > 0 && (
+              <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+                <div className="bg-[#30D5C8]/10 border border-[#30D5C8]/30 rounded-lg p-2 text-[#30D5C8] text-xs text-center">
+                  {completedCount}/{selectedCount} source{selectedCount !== 1 ? 's' : ''} ready &mdash; +{
+                    Object.keys(collectedData).reduce((s, id) => s + (IMPROVEMENT_MAP[id] ?? 0), 0)
+                  }% process understanding
+                </div>
+                <button
+                  onClick={handleStartAnalysis}
+                  className="w-full py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-tr from-[#F5A623] to-[#FF6B35] text-black cursor-pointer hover:scale-[1.01] transition-all"
+                >
+                  Start Analysis with {completedCount} Source{completedCount !== 1 ? 's' : ''}
+                </button>
+              </motion.div>
+            )}
           </motion.div>
         )}
 

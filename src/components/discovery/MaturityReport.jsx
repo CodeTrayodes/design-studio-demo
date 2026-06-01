@@ -18,11 +18,11 @@ export default function MaturityReport({ data }) {
   const stageCount = data?.stages?.length ?? 12;
 
   function openFullAnalysis() {
-    window.location.href = '/analysis';
+    window.open('/analysis', '_blank');
   }
 
   function openRoadmap() {
-    window.location.href = '/roadmap';
+    window.open('/roadmap', '_blank');
   }
 
   return (

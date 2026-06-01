@@ -131,14 +131,22 @@ export default function CompanyVerificationCard({
 
       {/* Brief display or edit textarea */}
       <div className="bg-[#2C2C2E] rounded-lg p-4">
-        {editing ? (
-          <textarea
-            value={editedBrief}
-            onChange={(e) => setEditedBrief(e.target.value)}
-            rows={5}
-            className="w-full bg-transparent border-none outline-none ring-0 resize-none text-[#F1F1F3] text-sm leading-relaxed placeholder-[#8E8E93]/50 focus:outline-none focus:ring-0"
-            autoFocus
-          />
+        {editing || !editedBrief ? (
+          <>
+            {!editedBrief && !editing && (
+              <p className="text-[#8E8E93] text-xs italic mb-2">
+                We couldn&apos;t find public data for this company. Add a brief description to get more accurate results.
+              </p>
+            )}
+            <textarea
+              value={editedBrief}
+              onChange={(e) => setEditedBrief(e.target.value)}
+              rows={4}
+              placeholder="e.g. A mid-market financial services firm focused on commercial lending and risk management..."
+              className="w-full bg-transparent border-none outline-none ring-0 resize-none text-[#F1F1F3] text-sm leading-relaxed placeholder-[#8E8E93]/40 focus:outline-none focus:ring-0"
+              autoFocus={!editedBrief}
+            />
+          </>
         ) : (
           <p className="text-[#F1F1F3] text-sm leading-relaxed">{editedBrief}</p>
         )}
@@ -252,7 +260,9 @@ export default function CompanyVerificationCard({
       <div className="flex items-center gap-1.5">
         <Info size={11} className="text-[#8E8E93] shrink-0" />
         <p className="text-[#8E8E93] text-xs italic">
-          Industry and governance auto-detected from company data
+          {companyBrief
+            ? 'Sourced from public company data + AI analysis'
+            : 'Company not found in public data — add details for better results'}
         </p>
       </div>
 
